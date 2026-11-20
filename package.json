@@ -18,7 +18,8 @@
   },
   "scripts": {
     "validate": "node scripts/validate.ts",
-    "test": "node scripts/test.ts"
+    "test": "node scripts/test.ts",
+    "sync": "node scripts/sync-shared.ts"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

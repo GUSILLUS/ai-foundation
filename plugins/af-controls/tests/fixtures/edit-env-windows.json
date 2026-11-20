@@ -1,0 +1,1 @@
+{"session_id":"00000000-0000-4000-8000-000000000001","cwd":"C:/fixtures/project-a","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"C:\\fixtures\\project-a\\.ENV","old_string":"<fixture>","new_string":"<fixture>"}}

@@ -17,6 +17,10 @@ export const typecheckCheck: Check = {
     if (r.code === 0) return res;
     const out = (r.stdout + r.stderr).trim();
     if (out.includes('TS18003')) return { ...res, skipped: 'немає .ts-файлів' };
+    if (out.includes('Unable to resolve @typescript/')) {
+      res.errors.push(`бінарник TypeScript для ${process.platform}-${process.arch} не встановлено — виконайте npm ci на цій ОС`);
+      return res;
+    }
     res.errors.push(...(out ? out.split(/\r?\n/).filter(Boolean) : [`tsc завершився з кодом ${r.code}`]));
     return res;
   },
