@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-11-20
+
+Перший реліз усіх чотирьох плагінів (`af-core`, `af-controls`, `af-handoff`, `af-metrics` — 0.1.0). Етап 1 «каркас» завершено.
+
 ### Додано
 
 - Каркас репозиторію: маркетплейс `ai-foundation`, порожні плагіни `af-core`, `af-controls`, `af-handoff`, `af-metrics` (усі 0.1.0).
