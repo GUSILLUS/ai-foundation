@@ -92,12 +92,6 @@ describe('CLI', () => {
     assert.match(r.stdout, /Файлів: 2/);
   });
 
-  test('без --inventory — підказка й код 2', () => {
-    const r = spawnSync(process.execPath, [CLI, '--config-dir', CONFIG], { encoding: 'utf8' });
-    assert.equal(r.status, 2);
-    assert.match(r.stderr, /--inventory/);
-  });
-
   test('неіснуюча тека Claude Code — код 1 без шляху у виводі', () => {
     const missing = path.join(tmpdir(), 'af-no-such-config-dir');
     const r = spawnSync(process.execPath, [CLI, '--inventory', '--config-dir', missing], { encoding: 'utf8' });

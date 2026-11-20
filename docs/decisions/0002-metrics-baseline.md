@@ -89,7 +89,10 @@
 - активний час — сума `system/turn_duration.durationMs`, а не проміжки між записами;
 - стиснення — записи `system/compact_boundary`, тригер — `compactMetadata.trigger`;
 - відмови — `permissionDecision.decision: "reject"`, розріз за `source` і `reasonType`;
-- промпт людини — визначається за `origin.kind` / `promptSource` / `turnOrigin`; значення уточнює повторна інвентаризація з розширеним переліком полів.
+- промпт людини — `origin.kind: "human"`; у версіях без `origin` — `promptSource` `typed` або `suggestion_accepted`; без обох полів — будь-який `user`-запис, що не є результатом інструмента, мета-повідомленням чи підсумком стиснення. `peer` (повідомлення іншої сесії) і `task-notification` (сповіщення фонових задач) рахуються окремо як «інші промпти» (повторна інвентаризація на Windows: `human` 559, `task-notification` 77, `peer` 9);
+- відмови переважно від класифікатора автоматичного режиму: 17 із 33 — `classifier:auto-mode:unavailable` (класифікатор недоступний), 13 — рішення класифікатора, 1 — хук `env-guard`. Розріз відмов: `source / reasonCode / classifierCategory`;
+- вартість сесії: `cost-state` — накопичувальні знімки одного процесу Claude Code (`startTime`), тож беремо максимум на процес і сумуємо процеси сесії;
+- правки, зроблені субагентами (`isSidechain`), не входять у ходи й раунди правок, але входять у виклики інструментів і токени.
 
 ## Наслідки
 

@@ -16,11 +16,16 @@ claude plugin install af-metrics@ai-foundation
 Лише читає транскрипти Claude Code (`<CLAUDE_CONFIG_DIR>/projects/**/*.jsonl`, за замовчуванням `~/.claude`). Визначення метрик — `docs/decisions/0002-metrics-baseline.md`.
 
 ```bash
-npm run metrics:inventory
+npm run metrics:baseline              # базова лінія: baseline-<дата>.md і .json
+npm run metrics:baseline -- --since 2026-11-01 --anonymize
+npm run metrics:inventory             # опис даних для аналізу схеми
 # або з установленої копії:
-node <тека плагіна>/scripts/analyze-history.ts --inventory [--config-dir <тека Claude Code>] [--out <тека звіту>]
+node <тека плагіна>/scripts/analyze-history.ts [--inventory] [--since YYYY-MM-DD] [--anonymize] [--config-dir <тека Claude Code>] [--out <тека звіту>]
 ```
 
-`--inventory` описує дані агрегатами й пише `inventory-<дата>.json` у `~/ai-foundation-data/metrics/`. Звіт не містить текстів, шляхів, команд і назв проєктів — його можна пересилати для аналізу схеми. Режим метрик з’явиться після інвентаризації.
+Звіти пишуться в `~/ai-foundation-data/metrics/`.
+
+- **Базова лінія** містить лише агрегати: лічильники, токени, вартість, назви інструментів, скілів, субагентів і моделей. Текстів промптів і відповідей, шляхів файлів і команд у ній немає. Назви проєктів — справжні (остання частина робочої теки); `--anonymize` замінює їх на `project-1`, `project-2`, … — для звіту, яким треба поділитися.
+- **Інвентаризація** описує структуру транскриптів: типи записів, ключі без значень, переліки, версії. Назв проєктів не містить — її можна пересилати для аналізу схеми після оновлення Claude Code.
 
 Статус: етап 1 — каркас. Кожна зміна — з тестом і записом у кореневому `CHANGELOG.md`.

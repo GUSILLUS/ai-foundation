@@ -20,7 +20,8 @@
     "validate": "node scripts/validate.ts",
     "test": "node scripts/test.ts",
     "sync": "node scripts/sync-shared.ts",
-    "metrics:inventory": "node plugins/af-metrics/scripts/analyze-history.ts --inventory"
+    "metrics:inventory": "node plugins/af-metrics/scripts/analyze-history.ts --inventory",
+    "metrics:baseline": "node plugins/af-metrics/scripts/analyze-history.ts"
   },
   "devDependencies": {
     "@types/node": "22.20.5",
