@@ -5,7 +5,7 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { collectSessions, toolLabel } from '../lib/metrics.ts';
-import { buildReport, isoWeek } from '../lib/report.ts';
+import { buildReport, weekLabel, weekStart } from '../lib/report.ts';
 import { findTranscriptFiles } from '../lib/transcripts.ts';
 
 const CONFIG = path.join(import.meta.dirname, 'fixtures', 'claude-config-metrics');
@@ -78,7 +78,7 @@ describe('метрики сесії (синтетична сесія з форк
     assert.equal(r.totals.humanPrompts, 4);
     assert.equal(r.totals.editRoundRate, 0.5);
     assert.equal(r.totals.sessionsWithoutCost, 1);
-    assert.deepEqual(Object.keys(r.byWeek), ['2026-W45']);
+    assert.deepEqual(Object.keys(r.byWeek), ['2026-11-02']);
     assert.deepEqual(Object.keys(r.byProject), ['project-b']);
     const anon = buildReport(sessions, { analyzer: 'test', anonymize: true });
     assert.deepEqual(Object.keys(anon.byProject), ['project-1']);
@@ -91,10 +91,12 @@ describe('метрики сесії (синтетична сесія з форк
   });
 });
 
-test('isoWeek і toolLabel', () => {
-  assert.equal(isoWeek('2026-11-03T10:00:00.000Z'), '2026-W45');
-  assert.equal(isoWeek('2026-01-01T00:00:00.000Z'), '2026-W01');
-  assert.equal(isoWeek('2027-01-01T00:00:00.000Z'), '2026-W53');
+test('тижні й toolLabel', () => {
+  assert.equal(weekStart('2026-11-03T10:00:00.000Z'), '2026-11-02');
+  assert.equal(weekStart('2026-11-08T23:59:59.000Z'), '2026-11-02');
+  assert.equal(weekStart('2026-11-09T00:00:00.000Z'), '2026-11-09');
+  assert.equal(weekLabel('2026-09-07'), '07.09–13.09.2026');
+  assert.equal(weekLabel('2025-12-29'), '29.12.2025–04.01.2026');
   assert.equal(toolLabel('mcp__plugin_af-x_db__query'), 'mcp__plugin_af-x_db');
   assert.equal(toolLabel('Read'), 'Read');
 });

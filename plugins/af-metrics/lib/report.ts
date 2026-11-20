@@ -45,6 +45,7 @@ export interface Report {
   rejections: Record<string, number>;
   compactions: Record<string, number>;
   versions: Record<string, number>;
+  /** Ключ — понеділок тижня (YYYY-MM-DD). */
   byWeek: Record<string, Totals>;
   byProject: Record<string, Totals>;
   byEntrypoint: Record<string, Totals>;
@@ -84,7 +85,7 @@ export function buildReport(sessions: SessionStats[], opts: { anonymize?: boolea
     rejections: merge((s) => s.rejections),
     compactions: merge((s) => s.compactions),
     versions,
-    byWeek: group((s) => isoWeek(s.start)),
+    byWeek: group((s) => weekStart(s.start)),
     byProject: group((s) => project(s.project)),
     byEntrypoint: group((s) => s.entrypoint),
   };
@@ -148,16 +149,24 @@ export function totals(sessions: SessionStats[]): Totals {
   return t;
 }
 
-/** ISO-тиждень у форматі 2026-W47. */
-export function isoWeek(iso: string): string {
+/** Понеділок тижня (UTC) у форматі YYYY-MM-DD — ключ розрізу «по тижнях», сортується хронологічно. */
+export function weekStart(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return 'unknown';
-  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((date.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
-  return `${date.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
+  return monday.toISOString().slice(0, 10);
+}
+
+/** Людська мітка тижня: «07.09–13.09.2026»; якщо тиждень перетинає рік — «29.12.2025–04.01.2026». */
+export function weekLabel(start: string): string {
+  const d = new Date(`${start}T00:00:00.000Z`);
+  if (Number.isNaN(d.getTime())) return start;
+  const end = new Date(d);
+  end.setUTCDate(end.getUTCDate() + 6);
+  const dm = (x: Date) => `${String(x.getUTCDate()).padStart(2, '0')}.${String(x.getUTCMonth() + 1).padStart(2, '0')}`;
+  const sameYear = d.getUTCFullYear() === end.getUTCFullYear();
+  return `${dm(d)}${sameYear ? '' : `.${d.getUTCFullYear()}`}–${dm(end)}.${end.getUTCFullYear()}`;
 }
 
 function zeroTokens(): TokenTotals {
@@ -230,7 +239,7 @@ export function formatReport(r: Report): string {
 ## По тижнях
 
 ${header}
-${Object.entries(r.byWeek).map(([k, x]) => row(k, x)).join('\n')}
+${Object.entries(r.byWeek).map(([k, x]) => row(weekLabel(k), x)).join('\n')}
 
 ## По проєктах
 
