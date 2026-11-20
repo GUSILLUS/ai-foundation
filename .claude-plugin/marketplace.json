@@ -1,0 +1,14 @@
+{
+  "name": "ai-foundation",
+  "owner": {
+    "name": "Ivan Ivakhnenko",
+    "url": "https://github.com/GUSILLUS"
+  },
+  "description": "Плагіни Claude Code для комерційної розробки й самонавчання: контекст, контроль, handoff, метрики",
+  "plugins": [
+    { "name": "af-core", "source": "./plugins/af-core", "description": "Контекст проєкту, init, шаблони, робочий ланцюг" },
+    { "name": "af-controls", "source": "./plugins/af-controls", "description": "Бар’єри безпеки й бібліотека хуків" },
+    { "name": "af-handoff", "source": "./plugins/af-handoff", "description": "Передача контексту між сесіями" },
+    { "name": "af-metrics", "source": "./plugins/af-metrics", "description": "Метрики використання агентів" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "af-metrics",
+  "version": "0.1.0",
+  "description": "Метрики використання агентів для AI Foundation",
+  "author": {
+    "name": "Ivan Ivakhnenko",
+    "url": "https://github.com/GUSILLUS"
+  },
+  "homepage": "https://github.com/GUSILLUS/ai-foundation/tree/main/plugins/af-metrics",
+  "repository": "https://github.com/GUSILLUS/ai-foundation",
+  "license": "MIT",
+  "keywords": ["ai-foundation"]
+}

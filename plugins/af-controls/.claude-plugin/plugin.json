@@ -1,0 +1,13 @@
+{
+  "name": "af-controls",
+  "version": "0.1.0",
+  "description": "Бар’єри безпеки й бібліотека хуків для AI Foundation",
+  "author": {
+    "name": "Ivan Ivakhnenko",
+    "url": "https://github.com/GUSILLUS"
+  },
+  "homepage": "https://github.com/GUSILLUS/ai-foundation/tree/main/plugins/af-controls",
+  "repository": "https://github.com/GUSILLUS/ai-foundation",
+  "license": "MIT",
+  "keywords": ["ai-foundation"]
+}

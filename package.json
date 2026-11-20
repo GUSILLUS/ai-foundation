@@ -1,0 +1,24 @@
+{
+  "name": "ai-foundation",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Маркетплейс плагінів Claude Code для комерційної розробки й самонавчання",
+  "license": "MIT",
+  "author": "Ivan Ivakhnenko",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GUSILLUS/ai-foundation.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "config": {
+    "claudeCodeVersion": "2.1.321"
+  },
+  "scripts": {},
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2"
+  }
+}

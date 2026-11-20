@@ -1,0 +1,7 @@
+# Усі текстові файли — LF на будь-якій ОС (ADR 0001, «Кросплатформність»)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary

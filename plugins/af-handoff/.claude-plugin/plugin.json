@@ -1,0 +1,13 @@
+{
+  "name": "af-handoff",
+  "version": "0.1.0",
+  "description": "Передача контексту між сесіями для AI Foundation",
+  "author": {
+    "name": "Ivan Ivakhnenko",
+    "url": "https://github.com/GUSILLUS"
+  },
+  "homepage": "https://github.com/GUSILLUS/ai-foundation/tree/main/plugins/af-handoff",
+  "repository": "https://github.com/GUSILLUS/ai-foundation",
+  "license": "MIT",
+  "keywords": ["ai-foundation"]
+}

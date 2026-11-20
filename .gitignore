@@ -1,0 +1,23 @@
+# Залежності й кеші
+node_modules/
+.npm/
+*.tsbuildinfo
+
+# Секрети — ніколи в репо
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Локальні налаштування Claude Code
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
+
+# Система й редактори
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
