@@ -13,14 +13,16 @@ const PROJECTS = path.join(CONFIG, 'projects');
 const CLI = path.join(import.meta.dirname, '..', 'scripts', 'analyze-history.ts');
 const S2 = '00000000-0000-4000-8000-0000000000b2';
 const S3 = '00000000-0000-4000-8000-0000000000b3';
+const S4 = '00000000-0000-4000-8000-0000000000b4';
 
 describe('метрики сесії (синтетична сесія з форком)', async () => {
   const sessions = await collectSessions(findTranscriptFiles(CONFIG), PROJECTS);
   const s2 = sessions.find((s) => s.sessionId === S2)!;
   const s3 = sessions.find((s) => s.sessionId === S3)!;
+  const s4 = sessions.find((s) => s.sessionId === S4)!;
 
   test('копії записів у форку не рахуються вдруге', () => {
-    assert.equal(sessions.length, 2);
+    assert.equal(sessions.length, 3);
     assert.equal(s3.humanPrompts, 1);
     assert.equal(s3.responses, 0);
     assert.deepEqual(s3.toolCalls, {});
@@ -28,10 +30,16 @@ describe('метрики сесії (синтетична сесія з форк
 
   test('промпти людини — за origin.kind, а без нього за promptSource; службові не рахуються', () => {
     assert.equal(s2.humanPrompts, 3);
-    assert.deepEqual(s2.otherPrompts, { peer: 1 });
+    assert.deepEqual(s2.otherPrompts, { peer: 1, unlabeled: 1 });
     assert.deepEqual(s2.promptBasis, { origin: 2, promptSource: 1 });
     assert.deepEqual(s2.excludedUserRecords, { 'compact-summary': 1, meta: 1 });
-    assert.deepEqual(s2.fallbackPrompts, {});
+    assert.deepEqual(s2.fallbackPrompts, { 'unlabeled · 2.1.321 · text': 1 });
+  });
+
+  test('стара сесія без origin: запис без позначок — промпт людини', () => {
+    assert.equal(s4.humanPrompts, 1);
+    assert.deepEqual(s4.promptBasis, { fallback: 1 });
+    assert.deepEqual(s4.fallbackPrompts, { '2.1.260 · string': 1 });
     assert.equal(s2.turns, 3);
   });
 
@@ -74,11 +82,11 @@ describe('метрики сесії (синтетична сесія з форк
 
   test('звіт: агрегати, тижні, анонімізація', () => {
     const r = buildReport(sessions, { analyzer: 'test' });
-    assert.equal(r.totals.sessions, 2);
-    assert.equal(r.totals.humanPrompts, 4);
+    assert.equal(r.totals.sessions, 3);
+    assert.equal(r.totals.humanPrompts, 5);
     assert.equal(r.totals.editRoundRate, 0.5);
-    assert.equal(r.totals.sessionsWithoutCost, 1);
-    assert.deepEqual(Object.keys(r.byWeek), ['2026-11-02']);
+    assert.equal(r.totals.sessionsWithoutCost, 2);
+    assert.deepEqual(Object.keys(r.byWeek), ['2026-09-07', '2026-11-02']);
     assert.deepEqual(Object.keys(r.byProject), ['project-b']);
     const anon = buildReport(sessions, { analyzer: 'test', anonymize: true });
     assert.deepEqual(Object.keys(anon.byProject), ['project-1']);

@@ -36,7 +36,7 @@ export interface SessionStats {
   otherPrompts: Record<string, number>;
   /** user-записи без результатів інструментів, відкинуті як службові: meta, compact-summary, sidechain. */
   excludedUserRecords: Record<string, number>;
-  /** Діагностика запасного правила: версія Claude Code і форма вмісту (без тексту). */
+  /** Діагностика промптів без позначок: правило, версія Claude Code і форма вмісту (без тексту). */
   fallbackPrompts: Record<string, number>;
   responses: number;
   subagentResponses: number;
@@ -87,6 +87,16 @@ export async function collectSessions(files: string[], projectsDir: string, opts
   const seenTool = new Set<string>();
   const sessions = new Map<string, SessionState>();
 
+  // Попередній прохід: у яких сесіях промпти вже позначені origin.kind (ADR 0002, «Промпт людини»).
+  const labelledSessions = new Set<string>();
+  for (const file of files) {
+    for await (const line of readLines(file)) {
+      if (line.kind !== 'record') continue;
+      const r = line.record;
+      if (r.type === 'user' && typeof r.sessionId === 'string' && typeof getPath(r, 'origin.kind') === 'string') labelledSessions.add(r.sessionId);
+    }
+  }
+
   for (const file of files) {
     const projectDir = path.relative(projectsDir, file).split(/[\\/]/)[0] ?? '<unknown>';
     for await (const line of readLines(file)) {
@@ -112,7 +122,7 @@ export async function collectSessions(files: string[], projectsDir: string, opts
         s.labelled = true;
       }
 
-      if (type === 'user') onUser(s, r);
+      if (type === 'user') onUser(s, r, labelledSessions.has(r.sessionId));
       else if (type === 'assistant') onAssistant(s, r, seenMessage, seenTool);
       else if (type === 'system') onSystem(s, r);
       else onCost(s, r);
@@ -197,7 +207,7 @@ function contentBlocks(r: Record<string, unknown>): Record<string, unknown>[] {
   return Array.isArray(c) ? c.filter((b): b is Record<string, unknown> => typeof b === 'object' && b !== null) : [];
 }
 
-function onUser(s: SessionState, r: Record<string, unknown>): void {
+function onUser(s: SessionState, r: Record<string, unknown>, sessionLabelled: boolean): void {
   const blocks = contentBlocks(r);
   const results = blocks.filter((b) => b.type === 'tool_result');
 
@@ -235,6 +245,13 @@ function onUser(s: SessionState, r: Record<string, unknown>): void {
   if (r.isCompactSummary === true) return bump(s.stats.excludedUserRecords, `compact-summary${originTag}`);
   const source = r.promptSource;
   const basis = typeof kind === 'string' ? 'origin' : typeof source === 'string' ? 'promptSource' : 'fallback';
+  // Запасне правило — лише для сесій, де origin.kind ще не існував (старі версії Claude Code).
+  // У сесіях з позначками запис без них створила не людина: переривання, розгорнута команда тощо.
+  if (basis === 'fallback' && sessionLabelled) {
+    bump(s.stats.otherPrompts, 'unlabeled');
+    bump(s.stats.fallbackPrompts, `unlabeled · ${typeof r.version === 'string' && SAFE.test(r.version) ? r.version : 'no-version'} · ${contentShape(r)}`);
+    return;
+  }
   const human = basis === 'origin' ? kind === 'human' : basis === 'promptSource' ? HUMAN_PROMPT_SOURCES.has(source as string) : true;
   if (human) {
     s.stats.humanPrompts++;
