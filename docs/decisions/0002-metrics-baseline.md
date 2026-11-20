@@ -80,7 +80,16 @@
 | Дата | Машина | Що знайдено |
 | --- | --- | --- |
 | 2026-11-20 | Хмарна сесія Cowork (Linux) | 1 файл `<project>/<session>.jsonl`, 1 121 запис, 0 невалідних; 11 типів записів, схема збігається з ADR 0001 (п. 11); версії Claude Code змінювалися в межах сесії (2.1.319 → 2.1.329); `entrypoint: remote_cowork`. Перевірено: у звіті немає шляхів, e-mail і назв |
-| — | Основна Windows-машина | очікується |
+| 2026-11-20 | Основна Windows-машина | 63 файли (54 сесії + 9 транскриптів субагентів), 383,5 МБ, 60 959 записів, 0 невалідних; 10.09–20.11.2026; 27 версій Claude Code; `entrypoint`: `cli` 27 351, `claude-desktop` 2 890. Рішення про дозволи: `accept` 7 193, `reject` 33 (переважно класифікатор автоматичного режиму). Помилки API — записи `assistant` з `isApiErrorMessage`/`error`; стиснення — `system/compact_boundary` (24); тривалість ходів — `system/turn_duration` (533). `api-request-blob` містить копію розмови — у метриках не рахувати |
+
+Уточнення до визначень (п. 3) за результатами Windows:
+
+- метрики рахують лише записи `assistant` і `user`; `api-request-blob` ігноруємо;
+- відповіді з `message.model: "<synthetic>"` (повідомлення про помилки API) — у помилки, не в токени;
+- активний час — сума `system/turn_duration.durationMs`, а не проміжки між записами;
+- стиснення — записи `system/compact_boundary`, тригер — `compactMetadata.trigger`;
+- відмови — `permissionDecision.decision: "reject"`, розріз за `source` і `reasonType`;
+- промпт людини — визначається за `origin.kind` / `promptSource` / `turnOrigin`; значення уточнює повторна інвентаризація з розширеним переліком полів.
 
 ## Наслідки
 

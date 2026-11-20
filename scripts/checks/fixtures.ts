@@ -7,7 +7,7 @@ import { emptyResult, type Check, type CheckResult } from '../lib/types.ts';
  * Фікстури тестів — лише синтетичні (ADR 0001, «Наслідки» п. 9; ADR 0002).
  *
  * Для JSON/JSONL діє білий список: кожне рядкове значення має бути
- *   - заглушкою `<fixture>` або `<fixture:щось>`;
+ *   - заглушкою `<fixture>` або `<fixture:щось>` (а також службовим `<synthetic>`-подібним значенням);
  *   - шляхом під дозволеним префіксом (`/fixtures/`, `C:/fixtures/`, `C:\fixtures\`)
  *     або відносним шляхом без пробілів;
  *   - коротким токеном без пробілів і слешів: ідентифікатор, версія, дата, назва інструмента чи моделі.
@@ -39,6 +39,8 @@ export const fixturesCheck: Check = {
 };
 
 const PLACEHOLDER = /^<fixture(?::[^<>]{0,60})?>$/;
+/** Службові значення Claude Code в кутових дужках, наприклад `<synthetic>` для повідомлень про помилки API. */
+const ANGLE_TOKEN = /^<[a-z][a-z_-]{0,30}>$/;
 const FIXTURE_PATH = /^(?:\/fixtures\/|[A-Za-z]:[\\/]fixtures[\\/])[^\s]*$/;
 const RELATIVE_PATH = /^(?![\\/~])(?![A-Za-z]:)[\w.@+-]+(?:[\\/][\w.@+-]+)*[\\/]?$/;
 const TOKEN = /^[\w.:+@#=,-]{0,100}$/;
@@ -48,7 +50,7 @@ const REAL_PATH = /(?:^|[\s"'=(])(?:\/(?:home|Users|root|mnt|sessions|var|opt|tm
 
 export function classifyString(value: string): string | null {
   if (EMAIL.test(value)) return 'e-mail';
-  if (PLACEHOLDER.test(value) || FIXTURE_PATH.test(value)) return null;
+  if (PLACEHOLDER.test(value) || ANGLE_TOKEN.test(value) || FIXTURE_PATH.test(value)) return null;
   if (REAL_PATH.test(value) || /^[\\/]/.test(value)) return 'абсолютний шлях поза /fixtures/';
   if (TOKEN.test(value) || RELATIVE_PATH.test(value)) return null;
   return 'вільний текст — замініть на "<fixture>"';

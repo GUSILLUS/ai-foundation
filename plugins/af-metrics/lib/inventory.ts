@@ -31,7 +31,23 @@ export const ENUM_FIELDS = [
   'message.content[].type',
   'permissionDecision.decision',
   'permissionDecision.source',
+  'permissionDecision.reasonType',
+  'permissionDecision.reasonCode',
+  'permissionDecision.classifierCategory',
+  'permissionDecision.grantScope',
   'attachment.type',
+  // Походження промпту: людина, інша сесія, субагент (ADR 0002, «Промпт людини»).
+  'origin.kind',
+  'promptSource',
+  'turnOrigin',
+  // Помилки API й стиснення контексту.
+  'isApiErrorMessage',
+  'error',
+  'compactMetadata.trigger',
+  // Записи api-request: звідки запит і з яким зусиллям.
+  'querySource',
+  'params.model',
+  'params.output_config.effort',
 ] as const;
 
 /** Контейнери, усередину яких не заглядаємо навіть за назвами ключів: там вміст користувача. */

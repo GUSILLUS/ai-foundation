@@ -29,13 +29,13 @@ describe('інвентаризація', async () => {
   });
 
   test('рахує рядки, включно зі зламаними й не-об’єктами', () => {
-    assert.deepEqual(inv.lines, { total: 14, records: 11, empty: 1, invalidJson: 1, nonObject: 1 });
+    assert.deepEqual(inv.lines, { total: 16, records: 13, empty: 1, invalidJson: 1, nonObject: 1 });
     assert.equal(inv.sessions, 1);
     assert.deepEqual(inv.dateRange, { first: '2026-11-01T10:00:00.000Z', last: '2026-11-02T09:00:00.000Z' });
   });
 
   test('описує типи записів і ключі, зокрема невідомий тип', () => {
-    assert.equal(inv.types.assistant?.count, 4);
+    assert.equal(inv.types.assistant?.count, 5);
     assert.equal(inv.types['future-thing']?.count, 1);
     for (const k of ['message.usage.output_tokens', 'message.usage.output_tokens_details.thinking_tokens', 'message.content[].type', 'requestId']) {
       assert.ok(inv.types.assistant?.keys.includes(k), k);
@@ -54,14 +54,20 @@ describe('інвентаризація', async () => {
   test('рахує лише значення полів-переліків', () => {
     assert.deepEqual(inv.values['permissionDecision.decision'], { accept: 1, reject: 1 });
     assert.deepEqual(inv.values['permissionDecision.source'], { config: 1, user_reject: 1 });
-    assert.deepEqual(inv.values.version, { '2.1.300': 6, '2.1.301': 1 });
+    assert.deepEqual(inv.values.version, { '2.1.300': 7, '2.1.301': 1 });
+    assert.deepEqual(inv.values['origin.kind'], { human: 1 });
+    assert.deepEqual(inv.values.promptSource, { keyboard: 1 });
+    assert.deepEqual(inv.values.isApiErrorMessage, { true: 1 });
+    assert.deepEqual(inv.values.error, { rate_limit: 1 });
+    assert.deepEqual(inv.values.querySource, { repl_main_thread: 1 });
+    assert.deepEqual(inv.values['params.output_config.effort'], { high: 1 });
+    assert.deepEqual(inv.values['message.model'], { 'claude-opus-5-5': 3, 'claude-haiku-5-5': 1, '<other>': 1 });
     assert.equal(inv.values['message.content[].type']?.tool_use, 2);
-    assert.equal(inv.values['message.model']?.['claude-haiku-5-5'], 1);
   });
 
   test('у звіті немає ні шляхів, ні вмісту, ні назви проєкту', () => {
     const text = JSON.stringify(inv);
-    for (const banned of ['/fixtures/project-a', '<fixture>', '-fixtures-project-a', 'src/a.ts', 'main']) {
+    for (const banned of ['/fixtures/project-a', '<fixture>', '-fixtures-project-a', 'src/a.ts', 'fixture-branch']) {
       assert.ok(!text.includes(banned), banned);
     }
   });
