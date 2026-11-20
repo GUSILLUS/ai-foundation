@@ -16,7 +16,10 @@
   "config": {
     "claudeCodeVersion": "2.1.321"
   },
-  "scripts": {},
+  "scripts": {
+    "validate": "node scripts/validate.ts",
+    "test": "node scripts/test.ts"
+  },
   "devDependencies": {
     "@types/node": "22.20.5",
     "typescript": "7.0.2"
