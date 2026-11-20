@@ -43,6 +43,7 @@ AI Foundation — набір плагінів Claude Code для моєї ком
 - `npm run validate` — уся перевірка: `claude plugin validate --strict` для маркетплейсу й кожного плагіна, наші перевірки, `tsc --noEmit`, sync `--check`, тести, фікстури, секрети. Запускати перед кожним комітом.
 - `npm test` — усі тести (хуки й скрипти) без решти перевірок. `npm run validate -- --only <id>` / `--skip <id>` — вибіркові перевірки.
 - `npm run sync` — оновити копії спільного коду з `shared/`.
+- `npm run metrics:baseline` / `npm run metrics:inventory` — базова лінія метрик / опис транскриптів; звіти в `~/ai-foundation-data/metrics/`.
 - `claude --plugin-dir ./plugins` — сесія з локальними плагінами; після змін хуків чи агентів — `/reload-plugins`.
 - Реліз: підняти `version` лише в `plugin.json`, запис у `CHANGELOG.md`, `claude plugin tag plugins/<плагін>`.
 
@@ -58,4 +59,5 @@ AI Foundation — набір плагінів Claude Code для моєї ком
 
 - `docs/vision.md` — що і навіщо: напрями, цілі, скоуп, звірка з матеріалами друга
 - `docs/tech-start.md` — рішення до першого рядка коду, середовище, перевірки, критерій готовності етапу 1, звірка з документацією
-- `docs/decisions/` — окремі рішення з поясненням «чому»; нове рішення — новий файл
+- `docs/decisions/` — окремі рішення з поясненням «чому»; нове рішення — новий файл (0001 — факти Claude Code, 0002 — базова лінія метрик)
+- `docs/install-check.md` — перевірка встановлення з маркетплейсу
