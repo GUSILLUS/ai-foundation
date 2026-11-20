@@ -11,6 +11,7 @@
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { claudeCheck } from './checks/claude.ts';
+import { fixturesCheck } from './checks/fixtures.ts';
 import { hooksCheck } from './checks/hooks.ts';
 import { manifestsCheck } from './checks/manifests.ts';
 import { secretsCheck } from './checks/secrets.ts';
@@ -28,6 +29,7 @@ export const CHECKS: Check[] = [
   typecheckCheck,
   syncCheck,
   secretsCheck,
+  fixturesCheck,
   testsCheck,
 ];
 

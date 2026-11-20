@@ -5,7 +5,7 @@ import { run } from '../lib/proc.ts';
 import { makeFakeRepo, runValidate, type FakeRepo } from './helpers/fake-repo.ts';
 
 /** Наші перевірки, які не потребують Claude Code, node_modules чи вкладених тестів. */
-const OWN = ['--only', 'manifests,skills,hooks,secrets'];
+const OWN = ['--only', 'manifests,skills,hooks,secrets,fixtures'];
 
 let repo: FakeRepo;
 beforeEach(() => {
@@ -160,6 +160,49 @@ describe('секрети', () => {
   test('рядок з позначкою дозволу пропускається', () => {
     repo.write('notes.md', `example ${fakeGithub} af-validate:allow-secret\n`);
     assert.equal(runValidate(repo.root, OWN).code, 0);
+  });
+});
+
+describe('фікстури', () => {
+  const fx = 'plugins/af-core/tests/fixtures/';
+
+  test('синтетичні значення проходять', () => {
+    repo.write(`${fx}ok.json`, {
+      session_id: '00000000-0000-4000-8000-000000000001',
+      cwd: '/fixtures/project-a',
+      win: 'C:\\fixtures\\project-a\\.env',
+      rel: 'config/.env.local',
+      timestamp: '2026-11-20T10:00:00.000Z',
+      model: 'claude-opus-5-5',
+      text: '<fixture>',
+      tokens: 42,
+    });
+    repo.write(`${fx}ok.jsonl`, '{"type":"user","message":{"content":"<fixture>"}}\n{"type":"assistant"}\n');
+    assert.equal(runValidate(repo.root, OWN).code, 0);
+  });
+
+  test('реальний шлях падає, а значення не виводиться', () => {
+    const secretPath = ['', 'home', 'ivan', 'client-x', 'src', 'a.ts'].join('/');
+    repo.write(`${fx}real.json`, { tool_input: { file_path: secretPath } });
+    const r = runValidate(repo.root, OWN);
+    assert.equal(r.code, 1, r.out);
+    assert.ok(r.out.includes('real.json → tool_input.file_path: абсолютний шлях поза /fixtures/'), r.out);
+    assert.ok(!r.out.includes('client-x'), 'значення потрапило у вивід');
+  });
+
+  test('Windows-шлях поза C:/fixtures падає', () => {
+    repo.write(`${fx}win.json`, { cwd: 'D:\\Work\\client' });
+    expectFail('win.json → cwd: абсолютний шлях поза /fixtures/');
+  });
+
+  test('e-mail падає', () => {
+    repo.write(`${fx}mail.jsonl`, JSON.stringify({ userEmail: ['someone', 'example.com'].join('@') }) + '\n');
+    expectFail('mail.jsonl:1 → userEmail: e-mail');
+  });
+
+  test('вільний текст замість заглушки падає', () => {
+    repo.write(`${fx}text.json`, { message: { content: 'please refactor the billing module' } });
+    expectFail('text.json → message.content: вільний текст');
   });
 });
 
