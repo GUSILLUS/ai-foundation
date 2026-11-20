@@ -5,7 +5,9 @@ import type { SessionStats, TokenTotals } from './metrics.ts';
 export interface Totals {
   sessions: number;
   humanPrompts: number;
+  promptBasis: Record<string, number>;
   otherPrompts: Record<string, number>;
+  excludedUserRecords: Record<string, number>;
   responses: number;
   subagentResponses: number;
   tokens: TokenTotals;
@@ -91,7 +93,9 @@ export function totals(sessions: SessionStats[]): Totals {
   const t: Totals = {
     sessions: sessions.length,
     humanPrompts: 0,
+    promptBasis: {},
     otherPrompts: {},
+    excludedUserRecords: {},
     responses: 0,
     subagentResponses: 0,
     tokens: zeroTokens(),
@@ -114,7 +118,9 @@ export function totals(sessions: SessionStats[]): Totals {
   let activeMs = 0;
   for (const s of sessions) {
     t.humanPrompts += s.humanPrompts;
+    t.promptBasis = sumMaps([t.promptBasis, s.promptBasis]);
     t.otherPrompts = sumMaps([t.otherPrompts, s.otherPrompts]);
+    t.excludedUserRecords = sumMaps([t.excludedUserRecords, s.excludedUserRecords]);
     t.responses += s.responses;
     t.subagentResponses += s.subagentResponses;
     for (const tok of Object.values(s.tokensByModel)) addTokens(t.tokens, tok);
@@ -202,7 +208,8 @@ export function formatReport(r: Report): string {
 | Метрика | Значення |
 | --- | --- |
 | Сесії | ${fmt(t.sessions)} |
-| Промпти людини | ${fmt(t.humanPrompts)} |
+| Промпти людини | ${fmt(t.humanPrompts)} (за origin.kind ${t.promptBasis.origin ?? 0}, за promptSource ${t.promptBasis.promptSource ?? 0}, без позначок ${t.promptBasis.fallback ?? 0}) |
+| Відкинуті службові записи | ${Object.entries(t.excludedUserRecords).map(([k, v]) => `${k} ${v}`).join(', ') || '—'} |
 | Інші промпти (не людина) | ${Object.entries(t.otherPrompts).map(([k, v]) => `${k} ${v}`).join(', ') || '—'} |
 | Відповіді моделі (основна / субагенти) | ${fmt(t.responses)} / ${fmt(t.subagentResponses)} |
 | Токени: input / output / cache read / cache write | ${mtok(t.tokens.input)} / ${mtok(t.tokens.output)} / ${mtok(t.tokens.cacheRead)} / ${mtok(t.tokens.cacheCreation)} |

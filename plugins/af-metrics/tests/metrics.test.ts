@@ -29,6 +29,8 @@ describe('метрики сесії (синтетична сесія з форк
   test('промпти людини — за origin.kind, а без нього за promptSource; службові не рахуються', () => {
     assert.equal(s2.humanPrompts, 3);
     assert.deepEqual(s2.otherPrompts, { peer: 1 });
+    assert.deepEqual(s2.promptBasis, { origin: 2, promptSource: 1 });
+    assert.deepEqual(s2.excludedUserRecords, { 'compact-summary': 1, meta: 1 });
     assert.equal(s2.turns, 3);
   });
 

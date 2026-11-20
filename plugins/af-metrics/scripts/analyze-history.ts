@@ -63,6 +63,7 @@ if (values.inventory) {
   writeFileSync(`${base}.md`, formatReport(report));
   const t = report.totals;
   console.log(`Сесій: ${t.sessions}, промптів людини: ${t.humanPrompts}, активних годин: ${t.activeHours}`);
+  console.log(`  промпти за origin.kind: ${t.promptBasis.origin ?? 0}, за promptSource: ${t.promptBasis.promptSource ?? 0}, без позначок: ${t.promptBasis.fallback ?? 0}; інші: ${JSON.stringify(t.otherPrompts)}; відкинуті службові: ${JSON.stringify(t.excludedUserRecords)}`);
   console.log(`Вартість (оцінка Claude Code): $${t.costUSD.toFixed(2)}; відмов: ${t.rejections}; помилок інструментів: ${t.toolErrors}`);
   console.log(`Ходи з правками: ${t.editTurns}, раунди правок: ${t.editRounds} (${t.editRoundRate === null ? '—' : (t.editRoundRate * 100).toFixed(1) + '%'})`);
   console.log(`\nЗвіт: ${base}.md і .json`);

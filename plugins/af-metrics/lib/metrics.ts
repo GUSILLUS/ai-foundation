@@ -31,7 +31,11 @@ export interface SessionStats {
   end: string;
   versions: string[];
   humanPrompts: number;
+  /** За яким правилом визнано промпт людини: origin, promptSource або fallback (без обох полів). */
+  promptBasis: Record<string, number>;
   otherPrompts: Record<string, number>;
+  /** user-записи без результатів інструментів, відкинуті як службові: meta, compact-summary, sidechain. */
+  excludedUserRecords: Record<string, number>;
   responses: number;
   subagentResponses: number;
   tokensByModel: Record<string, TokenTotals>;
@@ -135,7 +139,9 @@ function sessionFor(map: Map<string, SessionState>, r: Record<string, unknown>, 
         end: '',
         versions: [],
         humanPrompts: 0,
+        promptBasis: {},
         otherPrompts: {},
+        excludedUserRecords: {},
         responses: 0,
         subagentResponses: 0,
         tokensByModel: {},
@@ -210,12 +216,16 @@ function onUser(s: SessionState, r: Record<string, unknown>): void {
     return;
   }
 
-  if (r.isSidechain === true || r.isMeta === true || r.isCompactSummary === true) return;
+  if (r.isSidechain === true) return bump(s.stats.excludedUserRecords, 'sidechain');
+  if (r.isMeta === true) return bump(s.stats.excludedUserRecords, 'meta');
+  if (r.isCompactSummary === true) return bump(s.stats.excludedUserRecords, 'compact-summary');
   const kind = getPath(r, 'origin.kind');
   const source = r.promptSource;
-  const human = typeof kind === 'string' ? kind === 'human' : typeof source === 'string' ? HUMAN_PROMPT_SOURCES.has(source) : true;
+  const basis = typeof kind === 'string' ? 'origin' : typeof source === 'string' ? 'promptSource' : 'fallback';
+  const human = basis === 'origin' ? kind === 'human' : basis === 'promptSource' ? HUMAN_PROMPT_SOURCES.has(source as string) : true;
   if (human) {
     s.stats.humanPrompts++;
+    bump(s.stats.promptBasis, basis);
     s.turn++;
   } else {
     bump(s.stats.otherPrompts, typeof kind === 'string' && SAFE.test(kind) ? kind : typeof source === 'string' && SAFE.test(source) ? source : 'other');
