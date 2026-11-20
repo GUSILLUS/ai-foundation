@@ -54,3 +54,4 @@ rm -rf "$(dirname "$CLAUDE_CONFIG_DIR")"; unset CLAUDE_CONFIG_DIR
 | Дата | ОС | Claude Code | Коміт | Результат |
 | --- | --- | --- | --- | --- |
 | 2026-11-20 | Linux (Ubuntu, Node 22.23) | 2.1.321 | `b740d2b` | ✔ усе як очікується; хук з кешу: deny на `.env`, тиша на звичайному файлі, деградація на зламаному JSON |
+| 2026-11-20 | Windows (PowerShell) | 2.1.321 | `b740d2b` | ✔ чотири плагіни `0.1.0 enabled`, `Hooks (1) PreToolUse`; хук з кешу: deny на `.env`, тиша на звичайному файлі |
