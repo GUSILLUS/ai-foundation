@@ -36,6 +36,8 @@ export interface SessionStats {
   otherPrompts: Record<string, number>;
   /** user-записи без результатів інструментів, відкинуті як службові: meta, compact-summary, sidechain. */
   excludedUserRecords: Record<string, number>;
+  /** Діагностика запасного правила: версія Claude Code і форма вмісту (без тексту). */
+  fallbackPrompts: Record<string, number>;
   responses: number;
   subagentResponses: number;
   tokensByModel: Record<string, TokenTotals>;
@@ -142,6 +144,7 @@ function sessionFor(map: Map<string, SessionState>, r: Record<string, unknown>, 
         promptBasis: {},
         otherPrompts: {},
         excludedUserRecords: {},
+        fallbackPrompts: {},
         responses: 0,
         subagentResponses: 0,
         tokensByModel: {},
@@ -180,6 +183,15 @@ export function projectLabel(cwd: string): string {
   return parts[parts.length - 1] ?? cwd;
 }
 
+/** Форма вмісту повідомлення без тексту: `string` або перелік типів блоків, наприклад `text+image`. */
+export function contentShape(r: Record<string, unknown>): string {
+  const c = getPath(r, 'message.content');
+  if (typeof c === 'string') return 'string';
+  if (!Array.isArray(c)) return 'none';
+  const types = [...new Set(c.map((b) => getPath(b, 'type')).map((t) => (typeof t === 'string' && SAFE.test(t) ? t : 'other')))];
+  return types.join('+') || 'empty';
+}
+
 function contentBlocks(r: Record<string, unknown>): Record<string, unknown>[] {
   const c = getPath(r, 'message.content');
   return Array.isArray(c) ? c.filter((b): b is Record<string, unknown> => typeof b === 'object' && b !== null) : [];
@@ -216,16 +228,18 @@ function onUser(s: SessionState, r: Record<string, unknown>): void {
     return;
   }
 
-  if (r.isSidechain === true) return bump(s.stats.excludedUserRecords, 'sidechain');
-  if (r.isMeta === true) return bump(s.stats.excludedUserRecords, 'meta');
-  if (r.isCompactSummary === true) return bump(s.stats.excludedUserRecords, 'compact-summary');
   const kind = getPath(r, 'origin.kind');
+  const originTag = typeof kind === 'string' && SAFE.test(kind) ? `(${kind})` : '';
+  if (r.isSidechain === true) return bump(s.stats.excludedUserRecords, `sidechain${originTag}`);
+  if (r.isMeta === true) return bump(s.stats.excludedUserRecords, `meta${originTag}`);
+  if (r.isCompactSummary === true) return bump(s.stats.excludedUserRecords, `compact-summary${originTag}`);
   const source = r.promptSource;
   const basis = typeof kind === 'string' ? 'origin' : typeof source === 'string' ? 'promptSource' : 'fallback';
   const human = basis === 'origin' ? kind === 'human' : basis === 'promptSource' ? HUMAN_PROMPT_SOURCES.has(source as string) : true;
   if (human) {
     s.stats.humanPrompts++;
     bump(s.stats.promptBasis, basis);
+    if (basis === 'fallback') bump(s.stats.fallbackPrompts, `${typeof r.version === 'string' && SAFE.test(r.version) ? r.version : 'no-version'} · ${contentShape(r)}`);
     s.turn++;
   } else {
     bump(s.stats.otherPrompts, typeof kind === 'string' && SAFE.test(kind) ? kind : typeof source === 'string' && SAFE.test(source) ? source : 'other');

@@ -31,6 +31,7 @@ describe('метрики сесії (синтетична сесія з форк
     assert.deepEqual(s2.otherPrompts, { peer: 1 });
     assert.deepEqual(s2.promptBasis, { origin: 2, promptSource: 1 });
     assert.deepEqual(s2.excludedUserRecords, { 'compact-summary': 1, meta: 1 });
+    assert.deepEqual(s2.fallbackPrompts, {});
     assert.equal(s2.turns, 3);
   });
 

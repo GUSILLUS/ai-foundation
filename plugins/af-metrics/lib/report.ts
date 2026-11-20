@@ -8,6 +8,7 @@ export interface Totals {
   promptBasis: Record<string, number>;
   otherPrompts: Record<string, number>;
   excludedUserRecords: Record<string, number>;
+  fallbackPrompts: Record<string, number>;
   responses: number;
   subagentResponses: number;
   tokens: TokenTotals;
@@ -96,6 +97,7 @@ export function totals(sessions: SessionStats[]): Totals {
     promptBasis: {},
     otherPrompts: {},
     excludedUserRecords: {},
+    fallbackPrompts: {},
     responses: 0,
     subagentResponses: 0,
     tokens: zeroTokens(),
@@ -121,6 +123,7 @@ export function totals(sessions: SessionStats[]): Totals {
     t.promptBasis = sumMaps([t.promptBasis, s.promptBasis]);
     t.otherPrompts = sumMaps([t.otherPrompts, s.otherPrompts]);
     t.excludedUserRecords = sumMaps([t.excludedUserRecords, s.excludedUserRecords]);
+    t.fallbackPrompts = sumMaps([t.fallbackPrompts, s.fallbackPrompts]);
     t.responses += s.responses;
     t.subagentResponses += s.subagentResponses;
     for (const tok of Object.values(s.tokensByModel)) addTokens(t.tokens, tok);
