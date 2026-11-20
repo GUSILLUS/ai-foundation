@@ -11,3 +11,4 @@
 - Спільний код: `shared/` + мапа `shared/sync.json`, копії в `plugins/<плагін>/lib/shared/`; `npm run sync` і `--check` (ловить змінені, відсутні й зайві копії).
 - `shared/hook-runtime.ts`: обв'язка хуків — безпечна деградація (код 0 і повідомлення), блокування лише через JSON-рішення, вхід хука ніколи не виводиться.
 - **af-controls:** хук `env-guard` (PreToolUse) блокує читання й редагування `.env`, `.env.*`, `*.env`, `.envrc`; дозволяє `.env.example`/`.sample`/`.template`/`.dist`.
+- CI (GitHub Actions): `npm run validate` на Ubuntu і Windows з Node 22.18 і 24, Claude Code — закріплена версія з `package.json`; щотижневий не блокуючий прогін на Claude Code `@latest`.

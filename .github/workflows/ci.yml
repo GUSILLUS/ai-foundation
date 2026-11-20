@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Щопонеділка: перевірка на найновішому Claude Code — ранній сигнал, що час піднімати закріплену версію.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate (${{ matrix.os }}, Node ${{ matrix.node }})
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        # 22.18 — мінімум (engines у package.json), 24 — актуальна LTS.
+        node: ['22.18', '24']
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Встановити залежності
+        run: npm ci
+
+      - name: Встановити Claude Code (закріплена версія з package.json)
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').config.claudeCodeVersion")
+          npm install --global "@anthropic-ai/claude-code@${version}"
+          claude --version
+
+      - name: npm run validate
+        run: npm run validate
+
+  latest-claude:
+    name: validate на Claude Code @latest (${{ matrix.os }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    # Не блокує: падіння означає «свідомо підняти config.claudeCodeVersion», а не зламаний main.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Встановити залежності
+        run: npm ci
+
+      - name: Встановити Claude Code @latest
+        shell: bash
+        run: |
+          npm install --global "@anthropic-ai/claude-code@latest"
+          claude --version
+
+      - name: npm run validate
+        run: npm run validate

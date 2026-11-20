@@ -1,5 +1,7 @@
 # AI Foundation
 
+[![CI](https://github.com/GUSILLUS/ai-foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/GUSILLUS/ai-foundation/actions/workflows/ci.yml)
+
 Набір плагінів [Claude Code](https://code.claude.com/docs) для комерційної розробки й самонавчання: контекст проєкту, контроль і перевірки, handoff між сесіями, метрики використання.
 
 Інструмент особистий, але професійного рівня. Зараз іде етап 1 — каркас: плагіни порожні, функціональність з’являтиметься поступово.
