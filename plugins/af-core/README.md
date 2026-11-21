@@ -11,7 +11,7 @@ claude plugin marketplace add GUSILLUS/ai-foundation
 claude plugin install af-core@ai-foundation
 ```
 
-## Що є (0.2.0)
+## Що є (0.3.0)
 
 **Хук SessionStart** (`hooks/session-start.ts`) на кожному старті, `/clear`, відновленні й стисненні додає агенту:
 
@@ -30,5 +30,14 @@ claude plugin install af-core@ai-foundation
 ```
 
 `client` і `project` — slug (a-z, 0-9, `-`, `_`). Незареєстрована тека отримує лише правила: вгадувати проєкт за назвою теки не можна (ізоляція клієнтів). Збій (зламаний реєстр, неоднозначний remote) — правила без картки й один рядок користувачу; сесія не блокується. Тека даних перевизначається змінною `AF_DATA_DIR`.
+
+**Скіл `project-knowledge`** (`/af-core:project-knowledge [register | card | record <тема> | verify]`) веде картку й базу знань:
+
+- `register` — додає проєкт у `projects.json` за git remote (без нього — за шляхом); наявні записи не перезаписує;
+- `card` — сканує маніфести, конфіги, скрипти й структуру і заповнює шаблон картки;
+- `record` — запис знань (`process`, `flow`, `feature`, `edge-case`, `decision`, `glossary`) з джерелами, у проєкт чи в спільне клієнта;
+- `verify` — застарілі записи (код під `paths` змінився після `verified`) і перенесення корисного з auto memory у кандидати.
+
+Усе показується перед записом і пишеться лише після затвердження. Детермінована частина — `scripts/knowledge.ts` (`where`, `register`, `index`, `stale`). Eval-кейси — `evals/`, запуск свідомо: `claude plugin eval plugins/af-core --runs 1 --max-cost-usd 2`.
 
 Шаблон картки — `templates/context.md`. Рішення — ADR 0004. Кожна зміна — з тестом і записом у кореневому `CHANGELOG.md`.
