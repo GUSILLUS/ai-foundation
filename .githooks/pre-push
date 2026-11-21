@@ -1,0 +1,4 @@
+#!/bin/sh
+# Перед push: назви клієнтів і проєктів у файлах і повідомленнях комітів (ADR 0004).
+# Підключення: npm run hooks:install. Обійти в крайньому разі: git push --no-verify.
+exec node "$(git rev-parse --show-toplevel)/scripts/hooks/pre-push.ts" "$@"

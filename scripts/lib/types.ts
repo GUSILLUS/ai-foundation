@@ -9,6 +9,8 @@ export interface CheckResult {
 export interface Context {
   /** Абсолютний шлях до кореня репозиторію, який перевіряємо. */
   root: string;
+  /** Аргументи git log для перевірки повідомлень комітів (`--commits`). */
+  commits?: string[];
 }
 
 export interface Check {

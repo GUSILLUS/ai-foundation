@@ -29,6 +29,9 @@ jobs:
         node: ['22.18', '24']
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Повна історія — щоб перевірити повідомлення нових комітів на назви клієнтів.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v5
         with:
@@ -46,7 +49,20 @@ jobs:
           claude --version
 
       - name: npm run validate
-        run: npm run validate
+        shell: bash
+        env:
+          # HMAC-ключ для перевірки назв клієнтів і проєктів (ADR 0004); самих назв у репо немає.
+          AF_NAMES_KEY: ${{ secrets.AF_NAMES_KEY }}
+          BEFORE: ${{ github.event.before }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          range=""
+          if [ -n "$BASE_REF" ]; then
+            range="origin/$BASE_REF..HEAD"
+          elif [ -n "$BEFORE" ] && ! echo "$BEFORE" | grep -qE '^0+$'; then
+            range="$BEFORE..HEAD"
+          fi
+          if [ -n "$range" ]; then npm run validate -- --commits "$range"; else npm run validate; fi
 
   latest-claude:
     name: validate на Claude Code @latest (${{ matrix.os }})
@@ -76,4 +92,6 @@ jobs:
           claude --version
 
       - name: npm run validate
+        env:
+          AF_NAMES_KEY: ${{ secrets.AF_NAMES_KEY }}
         run: npm run validate

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
+import { run } from './proc.ts';
 
 export const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
 export const PLUGIN_MANIFEST = '.claude-plugin/plugin.json';
@@ -60,3 +61,18 @@ export const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const PLUGIN_PREFIX = 'af-';
 /** Плагіни, які ні від кого не залежать (CLAUDE.md, «Архітектурні правила»). */
 export const INDEPENDENT_PLUGINS = new Set(['af-core', 'af-controls']);
+
+/** Відстежувані й нові неігноровані файли з git; без git — обхід папки. */
+export function listRepoFiles(root: string): string[] {
+  if (existsSync(path.join(root, '.git'))) {
+    const r = run('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root });
+    if (r.code === 0) {
+      return r.stdout
+        .split('\0')
+        .filter(Boolean)
+        .map((f) => path.join(root, f))
+        .filter((f) => existsSync(f));
+    }
+  }
+  return walkFiles(root, () => true);
+}

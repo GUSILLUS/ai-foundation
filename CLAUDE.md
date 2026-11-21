@@ -43,6 +43,7 @@ AI Foundation — набір плагінів Claude Code для моєї ком
 - `npm run validate` — уся перевірка: `claude plugin validate --strict` для маркетплейсу й кожного плагіна, наші перевірки, `tsc --noEmit`, sync `--check`, тести, фікстури, секрети. Запускати перед кожним комітом.
 - `npm test` — усі тести (хуки й скрипти) без решти перевірок. `npm run validate -- --only <id>` / `--skip <id>` — вибіркові перевірки.
 - `npm run sync` — оновити копії спільного коду з `shared/`.
+- `npm run names:update` — оновити `.private-names.json` після зміни списку назв `~/ai-foundation-data/private-names.txt`; `npm run hooks:install` — підключити хук `pre-push` (раз на машину).
 - `npm run metrics:baseline` / `npm run metrics:inventory` — базова лінія метрик / опис транскриптів; звіти в `~/ai-foundation-data/metrics/`.
 - `claude --plugin-dir ./plugins` — сесія з локальними плагінами; після змін хуків чи агентів — `/reload-plugins`.
 - Реліз: підняти `version` лише в `plugin.json`, запис у `CHANGELOG.md`, `claude plugin tag plugins/<плагін>`.

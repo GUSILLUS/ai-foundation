@@ -47,6 +47,8 @@ claude --plugin-dir ./plugins   # сесія з локальними копія�
 | `npm run validate` | Уся перевірка (запускати перед кожним комітом); `-- --only <id>` / `--skip <id>` — вибірково |
 | `npm test` | Лише тести |
 | `npm run sync` | Оновити копії спільного коду з `shared/` |
+| `npm run names:update` | Оновити відбитки назв клієнтів і проєктів (`.private-names.json`) з локального списку |
+| `npm run hooks:install` | Підключити git-хук `pre-push` (перевірка назв у нових комітах) |
 | `npm run metrics:baseline` | Базова лінія метрик з історії сесій (`-- --since YYYY-MM-DD`, `--anonymize`) |
 | `npm run metrics:inventory` | Опис структури транскриптів для аналізу схеми |
 

@@ -1,7 +1,6 @@
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { run } from '../lib/proc.ts';
-import { rel, walkFiles } from '../lib/repo.ts';
+import { listRepoFiles, rel } from '../lib/repo.ts';
 import { emptyResult, type Check } from '../lib/types.ts';
 
 /** Рядок з цією позначкою сканер пропускає — для навмисних прикладів у документації. */
@@ -37,7 +36,7 @@ export const secretsCheck: Check = {
   title: 'Секрети: жодних токенів, ключів і .env',
   run: ({ root }) => {
     const res = emptyResult();
-    const files = listFiles(root);
+    const files = listRepoFiles(root);
     for (const file of files) {
       const name = rel(root, file);
       const base = path.basename(file);
@@ -70,18 +69,3 @@ export const secretsCheck: Check = {
     return res;
   },
 };
-
-/** Відстежувані й нові неігноровані файли з git; без git — обхід папки. */
-function listFiles(root: string): string[] {
-  if (existsSync(path.join(root, '.git'))) {
-    const r = run('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root });
-    if (r.code === 0) {
-      return r.stdout
-        .split('\0')
-        .filter(Boolean)
-        .map((f) => path.join(root, f))
-        .filter((f) => existsSync(f));
-    }
-  }
-  return walkFiles(root, () => true);
-}

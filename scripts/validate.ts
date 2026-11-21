@@ -5,6 +5,7 @@
  *   --root <dir>      корінь репозиторію (за замовчуванням — цей репозиторій)
  *   --only a,b        запустити лише вказані перевірки
  *   --skip a,b        пропустити вказані перевірки
+ *   --commits <range> перевірити й повідомлення комітів (аргументи git log, напр. "origin/main..HEAD")
  *
  * Код виходу 1, якщо хоч одна перевірка впала.
  */
@@ -14,6 +15,7 @@ import { claudeCheck } from './checks/claude.ts';
 import { fixturesCheck } from './checks/fixtures.ts';
 import { hooksCheck } from './checks/hooks.ts';
 import { manifestsCheck } from './checks/manifests.ts';
+import { namesCheck } from './checks/names.ts';
 import { secretsCheck } from './checks/secrets.ts';
 import { skillsCheck } from './checks/skills.ts';
 import { syncCheck } from './checks/sync.ts';
@@ -29,6 +31,7 @@ export const CHECKS: Check[] = [
   typecheckCheck,
   syncCheck,
   secretsCheck,
+  namesCheck,
   fixturesCheck,
   testsCheck,
 ];
@@ -38,6 +41,7 @@ const { values } = parseArgs({
     root: { type: 'string' },
     only: { type: 'string' },
     skip: { type: 'string' },
+    commits: { type: 'string' },
   },
 });
 
@@ -45,6 +49,7 @@ const root = path.resolve(values.root ?? path.join(import.meta.dirname, '..'));
 const list = (v?: string) => new Set((v ?? '').split(',').map((s) => s.trim()).filter(Boolean));
 const only = list(values.only);
 const skip = list(values.skip);
+const commits = (values.commits ?? '').split(/\s+/).filter(Boolean);
 const known = new Set(CHECKS.map((c) => c.id));
 for (const id of [...only, ...skip]) {
   if (!known.has(id)) {
@@ -59,7 +64,7 @@ for (const check of CHECKS) {
   if ((only.size > 0 && !only.has(check.id)) || skip.has(check.id)) continue;
   let r: CheckResult;
   try {
-    r = await check.run({ root });
+    r = await check.run({ root, commits });
   } catch (e) {
     r = { errors: [`перевірка впала з винятком: ${(e as Error).stack ?? e}`], warnings: [], notes: [] };
   }

@@ -20,6 +20,8 @@
     "validate": "node scripts/validate.ts",
     "test": "node scripts/test.ts",
     "sync": "node scripts/sync-shared.ts",
+    "names:update": "node scripts/names-update.ts",
+    "hooks:install": "git config core.hooksPath .githooks",
     "metrics:inventory": "node plugins/af-metrics/scripts/analyze-history.ts --inventory",
     "metrics:baseline": "node plugins/af-metrics/scripts/analyze-history.ts"
   },
