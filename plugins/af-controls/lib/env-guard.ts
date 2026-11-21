@@ -16,7 +16,7 @@ export const GUARDED_TOOLS = new Set(['Read', 'Edit', 'Write', 'MultiEdit', 'Not
 const SAFE_SUFFIXES = new Set(['example', 'sample', 'template', 'dist']);
 
 export const DENY_REASON =
-  'af-controls/env-guard: читання й редагування файлів оточення (.env) заборонене — секрети не мають потрапляти в контекст. ' +
+  'Читання й редагування файлів оточення (.env) заборонене — секрети не мають потрапляти в контекст. ' +
   'Якщо потрібна структура змінних, використайте .env.example або спитайте користувача.';
 
 /** Чи є ім’я файлу файлом оточення з потенційними секретами. */
