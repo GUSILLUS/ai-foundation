@@ -137,3 +137,16 @@ describe('CLI метрик', () => {
     assert.equal(run('--since', 'вчора').status, 2);
   });
 });
+
+describe('відмови хуків', async () => {
+  const config = path.join(import.meta.dirname, 'fixtures', 'claude-config-hooks');
+  const [s] = await collectSessions(findTranscriptFiles(config), path.join(config, 'projects'));
+
+  test('наш хук впізнається за іменем у причині, чужий — лише як hook', () => {
+    assert.deepEqual(s?.rejections, {
+      'hook / hook:PreToolUse / af-controls/env-guard': 1,
+      'hook / hook:PreToolUse': 1,
+    });
+  });
+});
+

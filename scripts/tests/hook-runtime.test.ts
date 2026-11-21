@@ -16,7 +16,7 @@ test('deny для PreToolUse — JSON-рішення з причиною, код
   assert.deepEqual(parse(r.stdout).hookSpecificOutput, {
     hookEventName: 'PreToolUse',
     permissionDecision: 'deny',
-    permissionDecisionReason: 'ні',
+    permissionDecisionReason: '[t] ні',
   });
 });
 

@@ -70,7 +70,8 @@ export async function processHook(name: string, raw: string, handler: HookHandle
           hookSpecificOutput: {
             hookEventName: 'PreToolUse',
             permissionDecision: 'deny',
-            permissionDecisionReason: outcome.reason,
+            // Ім'я хука в причині — щоб аналізатор історії знав, який бар'єр відмовив (урок L2 roadmap друга).
+            permissionDecisionReason: `[${name}] ${outcome.reason}`,
           },
         }),
       };

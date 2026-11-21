@@ -5,7 +5,7 @@ import { run } from '../lib/proc.ts';
 import { makeFakeRepo, runValidate, type FakeRepo } from './helpers/fake-repo.ts';
 
 /** Наші перевірки, які не потребують Claude Code, node_modules чи вкладених тестів. */
-const OWN = ['--only', 'manifests,skills,hooks,secrets,fixtures'];
+const OWN = ['--only', 'manifests,skills,budget,hooks,secrets,fixtures'];
 
 let repo: FakeRepo;
 beforeEach(() => {
@@ -111,6 +111,57 @@ describe('скіли', () => {
   test('коректний скіл проходить', () => {
     repo.write('plugins/af-core/skills/ok/SKILL.md', '---\nname: ok\ndescription: Short description\n---\nBody\n');
     assert.equal(runValidate(repo.root, OWN).code, 0);
+  });
+
+  test('name не збігається з текою', () => {
+    repo.write('plugins/af-core/skills/folder/SKILL.md', '---\nname: other\ndescription: d\n---\nBody\n');
+    expectFail('name "other" не збігається з текою "folder"');
+  });
+
+  test('посилання на неіснуючий файл — markdown і бектики', () => {
+    repo.write('plugins/af-core/skills/refs/SKILL.md', '---\nname: refs\ndescription: d\n---\nДив. [гайд](references/guide.md).\n');
+    expectFail('SKILL.md:5: посилання на неіснуючий файл references/guide.md');
+    repo.write('plugins/af-core/skills/refs/SKILL.md', '---\nname: refs\ndescription: d\n---\nЗапусти `scripts/run.ts`.\n');
+    expectFail('посилання на неіснуючий файл scripts/run.ts');
+  });
+
+  test('посилання в reference-файлі резолвиться від нього', () => {
+    repo.write('plugins/af-core/skills/refs/SKILL.md', '---\nname: refs\ndescription: d\n---\n[гайд](references/guide.md)\n');
+    repo.write('plugins/af-core/skills/refs/references/guide.md', '[назад](../SKILL.md), [вийде](missing.md)\n');
+    expectFail('references/guide.md:1: посилання на неіснуючий файл missing.md');
+  });
+
+  test('незакритий блок коду', () => {
+    repo.write('plugins/af-core/skills/fence/SKILL.md', '---\nname: fence\ndescription: d\n---\n```ts\nconst a = 1;\n');
+    expectFail('SKILL.md:5: незакритий блок коду');
+  });
+
+  test('посилання всередині блоку коду, зовнішні й якорі не перевіряються', () => {
+    repo.write(
+      'plugins/af-core/skills/ok2/SKILL.md',
+      '---\nname: ok2\ndescription: d\n---\n```md\n[x](references/none.md)\n```\n[doc](https://example.com) [a](#top) [p](${CLAUDE_SKILL_DIR}/x.md)\n',
+    );
+    assert.equal(runValidate(repo.root, OWN).code, 0, runValidate(repo.root, OWN).out);
+  });
+});
+
+describe('бюджет контексту', () => {
+  test('перевищення — попередження, не помилка', () => {
+    repo.write('plugins/af-core/context/global-rules.md', 'x'.repeat(2_500));
+    repo.write('plugins/af-core/templates/context.md', 'y'.repeat(8_000));
+    const r = runValidate(repo.root, ['--only', 'budget']);
+    assert.equal(r.code, 0, r.out);
+    assert.match(r.out, /глобальні правила — 2500 символів, ліміт 2000/);
+    assert.match(r.out, /шаблон картки проєкту — 8000 символів, ліміт 6000/);
+    assert.match(r.out, /разом 10500 символів — більше за ліміт SessionStart 10000/);
+  });
+
+  test('у межах бюджету — без попереджень', () => {
+    repo.write('plugins/af-core/context/global-rules.md', 'x'.repeat(1_000));
+    const r = runValidate(repo.root, ['--only', 'budget']);
+    assert.equal(r.code, 0, r.out);
+    assert.doesNotMatch(r.out, /⚠/);
+    assert.match(r.out, /1000 \/ 10000 символів/);
   });
 });
 

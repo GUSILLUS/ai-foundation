@@ -5,12 +5,14 @@
  *   --root <dir>      корінь репозиторію (за замовчуванням — цей репозиторій)
  *   --only a,b        запустити лише вказані перевірки
  *   --skip a,b        пропустити вказані перевірки
+ *   --base <ref>      база для перевірки версій плагінів (за замовчуванням — upstream гілки)
  *   --commits <range> перевірити й повідомлення комітів (аргументи git log, напр. "origin/main..HEAD")
  *
  * Код виходу 1, якщо хоч одна перевірка впала.
  */
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { budgetCheck } from './checks/budget.ts';
 import { claudeCheck } from './checks/claude.ts';
 import { fixturesCheck } from './checks/fixtures.ts';
 import { hooksCheck } from './checks/hooks.ts';
@@ -20,12 +22,15 @@ import { secretsCheck } from './checks/secrets.ts';
 import { skillsCheck } from './checks/skills.ts';
 import { syncCheck } from './checks/sync.ts';
 import { testsCheck } from './checks/tests.ts';
+import { versionsCheck } from './checks/versions.ts';
 import { typecheckCheck } from './checks/typecheck.ts';
 import type { Check, CheckResult } from './lib/types.ts';
 
 export const CHECKS: Check[] = [
   manifestsCheck,
+  versionsCheck,
   skillsCheck,
+  budgetCheck,
   hooksCheck,
   claudeCheck,
   typecheckCheck,
@@ -42,6 +47,7 @@ const { values } = parseArgs({
     only: { type: 'string' },
     skip: { type: 'string' },
     commits: { type: 'string' },
+    base: { type: 'string' },
   },
 });
 
@@ -64,7 +70,7 @@ for (const check of CHECKS) {
   if ((only.size > 0 && !only.has(check.id)) || skip.has(check.id)) continue;
   let r: CheckResult;
   try {
-    r = await check.run({ root, commits });
+    r = await check.run({ root, commits, ...(values.base ? { base: values.base } : {}) });
   } catch (e) {
     r = { errors: [`перевірка впала з винятком: ${(e as Error).stack ?? e}`], warnings: [], notes: [] };
   }

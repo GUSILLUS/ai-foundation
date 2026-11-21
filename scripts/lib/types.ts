@@ -11,6 +11,8 @@ export interface Context {
   root: string;
   /** Аргументи git log для перевірки повідомлень комітів (`--commits`). */
   commits?: string[];
+  /** База для перевірки версій (`--base`); без неї — upstream гілки. */
+  base?: string;
 }
 
 export interface Check {

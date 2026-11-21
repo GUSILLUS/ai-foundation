@@ -33,7 +33,7 @@ describe('env-guard: блокування', () => {
       const r = runHook(fixture(`${name}.json`));
       assert.equal(r.code, 0, r.raw);
       assert.equal(decision(r.out), 'deny', r.raw);
-      assert.equal(r.out?.hookSpecificOutput?.permissionDecisionReason, DENY_REASON);
+      assert.equal(r.out?.hookSpecificOutput?.permissionDecisionReason, `[af-controls/env-guard] ${DENY_REASON}`);
     });
   }
 });

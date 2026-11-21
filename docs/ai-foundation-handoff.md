@@ -48,7 +48,7 @@ AI Foundation — набір плагінів Claude Code для моєї ком
 **Етап 1 «каркас» завершено 20.11.2026, реліз 0.1.0 усіх чотирьох плагінів.**
 
 - Звірка з документацією Claude Code — ADR 0001; усі відкриті питання закрито.
-- `npm run validate` — 10 перевірок: маніфести, скіли, хуки, `claude plugin validate --strict`, типи, спільний код, секрети, назви клієнтів і проєктів, фікстури, тести. CI зелений на Windows і Linux.
+- `npm run validate` — 12 перевірок: маніфести, версії (змінений плагін — нова версія), скіли (ліміти, імена, посилання, блоки коду), бюджет контексту SessionStart, хуки, `claude plugin validate --strict`, типи, спільний код, секрети, назви клієнтів і проєктів, фікстури, тести. CI зелений на Windows і Linux.
 - `af-controls/env-guard` — PreToolUse-хук, блокує читання й редагування `.env*`; перевірено в живій сесії.
 - `af-metrics` — `npm run metrics:inventory` (схема транскриптів) і `npm run metrics:baseline` (метрики за ADR 0002).
 - Встановлення з GitHub у чистий профіль перевірено на Windows і Linux (`docs/install-check.md`).

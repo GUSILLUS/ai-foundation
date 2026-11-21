@@ -56,13 +56,14 @@ jobs:
           BEFORE: ${{ github.event.before }}
           BASE_REF: ${{ github.base_ref }}
         run: |
-          range=""
+          base=""
           if [ -n "$BASE_REF" ]; then
-            range="origin/$BASE_REF..HEAD"
+            base="origin/$BASE_REF"
           elif [ -n "$BEFORE" ] && ! echo "$BEFORE" | grep -qE '^0+$'; then
-            range="$BEFORE..HEAD"
+            base="$BEFORE"
           fi
-          if [ -n "$range" ]; then npm run validate -- --commits "$range"; else npm run validate; fi
+          # База: нові коміти перевіряються на назви, змінені плагіни — на підняту версію.
+          if [ -n "$base" ]; then npm run validate -- --commits "$base..HEAD" --base "$base"; else npm run validate; fi
 
   latest-claude:
     name: validate на Claude Code @latest (${{ matrix.os }})

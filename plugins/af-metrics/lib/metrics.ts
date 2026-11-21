@@ -12,6 +12,16 @@ import { getPath, readLines } from './transcripts.ts';
 const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit']);
 const AGENT_TOOLS = new Set(['Agent', 'Task']);
 const SAFE = /^[\w.:+@<>-]{1,80}$/;
+/** Ім'я нашого хука в причині відмови: `[af-плагін/хук]`. */
+const HOOK_MARKER = /\[(af-[a-z0-9-]{1,40}\/[a-z0-9-]{1,40})\]/;
+
+/** Текст результату інструмента: рядок або масив блоків `{type: 'text', text}`. */
+function resultText(block: Record<string, unknown>): string {
+  const c = block.content;
+  if (typeof c === 'string') return c;
+  if (Array.isArray(c)) return c.map((b) => (typeof b?.text === 'string' ? b.text : '')).join('\n');
+  return '';
+}
 /** promptSource, які означають введення людиною — для версій без origin.kind. */
 const HUMAN_PROMPT_SOURCES = new Set(['typed', 'suggestion_accepted']);
 
@@ -218,6 +228,11 @@ function onUser(s: SessionState, r: Record<string, unknown>, sessionLabelled: bo
         .map((p) => getPath(r, p))
         .map((v) => (typeof v === 'string' && SAFE.test(v) ? v : null))
         .filter(Boolean);
+      if (getPath(r, 'permissionDecision.source') === 'hook') {
+        // Наші хуки пишуть ім'я в причині відмови: `[af-controls/env-guard] …` (shared/hook-runtime.ts).
+        const name = results.map(resultText).join('\n').match(HOOK_MARKER)?.[1];
+        if (name) parts.push(name);
+      }
       bump(s.stats.rejections, parts.join(' / ') || 'unknown');
     }
     for (const res of results) {
