@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { processHook, type HookHandler } from '../../shared/hook-runtime.ts';
 
@@ -48,3 +48,26 @@ test('виняток в обробнику → деградація без те�
   assert.match(parse(r.stdout).systemMessage, /внутрішня помилка \(Error\)/);
   assert.ok(!r.stdout.includes('secret-value-in-message'));
 });
+
+describe('context', () => {
+  const start = JSON.stringify({ hook_event_name: 'SessionStart', source: 'startup' });
+
+  test('SessionStart — additionalContext і рядок користувачу', async () => {
+    const r = await processHook('t', start, () => ({ kind: 'context', text: 'правила', notice: 'картки немає' }));
+    assert.deepEqual(parse(r.stdout), {
+      hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: 'правила' },
+      systemMessage: '[t] картки немає',
+    });
+  });
+
+  test('порожній контекст — без виводу', async () => {
+    const r = await processHook('t', start, () => ({ kind: 'context', text: '' }));
+    assert.equal(r.stdout, '');
+  });
+
+  test('контекст для PreToolUse деградує', async () => {
+    const r = await processHook('t', pre, () => ({ kind: 'context', text: 'x' }));
+    assert.match(parse(r.stdout).systemMessage, /контекст підтримується лише/);
+  });
+});
+

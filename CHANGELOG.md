@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Додано (плагіни)
+
+- `af-core` 0.2.0: хук SessionStart — глобальні правила (`context/global-rules.md`) і картка проєкту з `~/ai-foundation-data/projects/<клієнт>/<проєкт>/context.md`; проєкт визначається за реєстром `projects.json` (git remote, worktree, запасний варіант — шлях); деградація без блокування. Шаблон картки — `templates/context.md`.
+- Спільна обв'язка хуків: результат `context` (additionalContext для SessionStart і UserPromptSubmit + рядок користувачу); копія тепер і в `af-core`.
+
 ### Змінено
 
 - `af-controls` 0.1.1: причина відмови хука починається з його імені (`[af-controls/env-guard] …`) — аналізатор історії бачить, який бар'єр відмовив (урок L2 roadmap друга).

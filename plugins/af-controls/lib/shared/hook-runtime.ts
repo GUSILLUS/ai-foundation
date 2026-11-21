@@ -26,7 +26,15 @@ export type HookOutcome =
   /** Свідомо заблокувати виклик інструмента (PreToolUse); причину бачить Claude. */
   | { kind: 'deny'; reason: string }
   /** Перевірку виконати неможливо: дія триває, користувач бачить попередження. */
-  | { kind: 'degrade'; reason: string };
+  | { kind: 'degrade'; reason: string }
+  /**
+   * Додати текст у контекст агента (SessionStart, UserPromptSubmit); `notice` — один рядок користувачу.
+   * Порожній текст без notice — те саме, що pass.
+   */
+  | { kind: 'context'; text: string; notice?: string };
+
+/** Події, для яких Claude Code приймає additionalContext від command-хука. */
+export const CONTEXT_EVENTS = new Set(['SessionStart', 'UserPromptSubmit']);
 
 export interface HookResponse {
   code: number;
@@ -62,6 +70,17 @@ export async function processHook(name: string, raw: string, handler: HookHandle
       return { code: 0, stdout: '' };
     case 'degrade':
       return degrade(name, outcome.reason);
+    case 'context': {
+      const event = (input as HookInput).hook_event_name;
+      if (typeof event !== 'string' || !CONTEXT_EVENTS.has(event)) {
+        return degrade(name, `контекст підтримується лише для ${[...CONTEXT_EVENTS].join(', ')}, отримано ${String(event)}`);
+      }
+      if (!outcome.text && !outcome.notice) return { code: 0, stdout: '' };
+      const out: Record<string, unknown> = {};
+      if (outcome.text) out.hookSpecificOutput = { hookEventName: event, additionalContext: outcome.text };
+      if (outcome.notice) out.systemMessage = `[${name}] ${outcome.notice}`;
+      return { code: 0, stdout: JSON.stringify(out) };
+    }
     case 'deny': {
       const event = (input as HookInput).hook_event_name;
       if (event !== 'PreToolUse') return degrade(name, `блокування підтримується лише для PreToolUse, отримано ${String(event)}`);
