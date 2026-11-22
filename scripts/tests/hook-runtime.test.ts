@@ -65,6 +65,12 @@ describe('context', () => {
     assert.equal(r.stdout, '');
   });
 
+  test('лише рядок користувачу — для будь-якої події', async () => {
+    const stop = JSON.stringify({ hook_event_name: 'Stop' });
+    const r = await processHook('t', stop, () => ({ kind: 'context', text: '', notice: 'є кандидати' }));
+    assert.deepEqual(parse(r.stdout), { systemMessage: '[t] є кандидати' });
+  });
+
   test('контекст для PreToolUse деградує', async () => {
     const r = await processHook('t', pre, () => ({ kind: 'context', text: 'x' }));
     assert.match(parse(r.stdout).systemMessage, /контекст підтримується лише/);

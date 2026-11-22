@@ -42,3 +42,23 @@ verified: 2026-11-21 abc1234
 | `glossary.md` | словник домену | спільне клієнта |
 
 Набір — шаблон: додавай гілки, яких потребує проєкт.
+
+## Кандидат
+
+Файл у `knowledge/_inbox/` (чи `_shared/knowledge/_inbox/`), одна знахідка — один файл:
+
+```yaml
+---
+target: process/deploy.md     # наявний чи новий запис
+confidence: confirmed          # confirmed — є джерело в коді чи слова користувача; likely — висновок
+sources:
+  - .github/workflows/deploy.yml:12
+---
+
+Що з'ясовано й що змінити в записі.
+```
+
+## Журнал змін
+
+`knowledge/_changes.md` — рядок на кожну правку без питання: `2026-11-23 · process/deploy.md · npm run deploy → npm run release · package.json:14`. За ним правку відкочують.
+

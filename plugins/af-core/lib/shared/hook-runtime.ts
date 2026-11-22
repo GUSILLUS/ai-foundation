@@ -29,7 +29,7 @@ export type HookOutcome =
   | { kind: 'degrade'; reason: string }
   /**
    * Додати текст у контекст агента (SessionStart, UserPromptSubmit, PostToolUse); `notice` — один рядок користувачу.
-   * Порожній текст без notice — те саме, що pass.
+   * Порожній текст без notice — те саме, що pass; лише notice — для будь-якої події.
    */
   | { kind: 'context'; text: string; notice?: string };
 
@@ -72,6 +72,8 @@ export async function processHook(name: string, raw: string, handler: HookHandle
       return degrade(name, outcome.reason);
     case 'context': {
       const event = (input as HookInput).hook_event_name;
+      // Лише рядок користувачу (systemMessage) підтримує будь-яка подія.
+      if (!outcome.text && outcome.notice) return { code: 0, stdout: JSON.stringify({ systemMessage: `[${name}] ${outcome.notice}` }) };
       if (typeof event !== 'string' || !CONTEXT_EVENTS.has(event)) {
         return degrade(name, `контекст підтримується лише для ${[...CONTEXT_EVENTS].join(', ')}, отримано ${String(event)}`);
       }

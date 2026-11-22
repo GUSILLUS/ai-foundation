@@ -6,7 +6,9 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/session-start.ts"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.ts"
+            ],
             "timeout": 10
           }
         ]
@@ -18,7 +20,9 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/prompt-hints.ts"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/prompt-hints.ts"
+            ],
             "timeout": 10
           }
         ]
@@ -31,7 +35,23 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/tool-hints.ts"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/tool-hints.ts"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/inbox-reminder.ts"
+            ],
             "timeout": 10
           }
         ]

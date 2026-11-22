@@ -38,6 +38,8 @@ claude plugin install af-core@ai-foundation
 
 Не більше трьох записів за раз; уже підказане чи прочитане в сесії не повторюється, а після `/clear` чи стиснення стан скидається. Стан — у `CLAUDE_PLUGIN_DATA`.
 
+**Нагадування про кандидатів** (`hooks/inbox-reminder.ts`, `Stop`): коли в `_inbox/` проєкту чи клієнта з'явилися нові кандидати знань, користувач бачить один рядок із кількістю й командою розбору.
+
 **Скіл `project-knowledge`** (`/af-core:project-knowledge [register | card | record <тема> | verify]`) веде картку й базу знань:
 
 - `register` — додає проєкт у `projects.json` за git remote (без нього — за шляхом); наявні записи не перезаписує;
