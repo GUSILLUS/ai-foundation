@@ -150,3 +150,26 @@ describe('відмови хуків', async () => {
   });
 });
 
+describe('обсяг результатів, пошук до першої правки, читання бази знань', async () => {
+  const config = path.join(import.meta.dirname, 'fixtures', 'claude-config-explore');
+  const sessions = await collectSessions(findTranscriptFiles(config), path.join(config, 'projects'));
+  const s = sessions[0]!;
+
+  test('символи результатів за інструментом', () => {
+    assert.deepEqual(s.toolResultChars, { Read: 18 + 12 + 12 + 16, Grep: 12, Edit: 9 });
+  });
+
+  test('Read/Grep/Glob до першої успішної правки', () => {
+    assert.deepEqual(s.exploreBeforeEdit, { calls: 4, chars: 18 + 12 + 12 + 12 });
+  });
+
+  test('записи бази знань без назв клієнта й проєкту; помилкове читання не рахується', () => {
+    assert.deepEqual(s.knowledgeReads, { 'клієнт: process/deploy': 1 });
+  });
+
+  test('звіт: середнє на сесію з правками', () => {
+    const r = buildReport(sessions, { analyzer: 'test' });
+    assert.deepEqual(r.exploreBeforeEdit, { sessions: 1, avgCalls: 4, avgChars: 54 });
+  });
+});
+

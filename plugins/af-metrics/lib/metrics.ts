@@ -10,6 +10,10 @@ import { getPath, readLines } from './transcripts.ts';
  */
 
 const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit']);
+/** Пошук і читання — те, що картка й база знань мають скоротити (ADR 0004, п. 9). */
+const EXPLORE_TOOLS = new Set(['Read', 'Grep', 'Glob']);
+/** Запис бази знань: `…/ai-foundation-data/projects/<клієнт>/<проєкт|_shared>/knowledge/<шлях>.md`. */
+const KNOWLEDGE_PATH = /ai-foundation-data[\\/]projects[\\/][^\\/]+[\\/]([^\\/]+)[\\/]knowledge[\\/](.+)\.md$/;
 const AGENT_TOOLS = new Set(['Agent', 'Task']);
 const SAFE = /^[\w.:+@<>-]{1,80}$/;
 /** Ім'я нашого хука в причині відмови: `[af-плагін/хук]`. */
@@ -66,12 +70,19 @@ export interface SessionStats {
   editRounds: number;
   filesEdited: number;
   filesReedited: number;
+  /** Обсяг результатів інструментів у символах (текстові блоки), за інструментом. */
+  toolResultChars: Record<string, number>;
+  /** Read/Grep/Glob основної сесії до першої успішної правки; null — правок у сесії не було. */
+  exploreBeforeEdit: { calls: number; chars: number } | null;
+  /** Прочитані записи бази знань: `проєкт: гілка/запис` чи `клієнт: …` — без назв клієнтів і проєктів. */
+  knowledgeReads: Record<string, number>;
 }
 
 interface PendingTool {
   name: string;
   turn: number;
   fileKey?: string;
+  readPath?: string;
 }
 
 interface SessionState {
@@ -83,6 +94,8 @@ interface SessionState {
   editTurnSet: Set<number>;
   fileTurns: Map<string, Set<number>>;
   costByProcess: Map<string, number>;
+  firstEditDone: boolean;
+  explore: { calls: number; chars: number };
 }
 
 export interface CollectOptions {
@@ -183,6 +196,9 @@ function sessionFor(map: Map<string, SessionState>, r: Record<string, unknown>, 
         editRounds: 0,
         filesEdited: 0,
         filesReedited: 0,
+        toolResultChars: {},
+        exploreBeforeEdit: null,
+        knowledgeReads: {},
       },
       labelled: false,
       turn: 0,
@@ -190,6 +206,8 @@ function sessionFor(map: Map<string, SessionState>, r: Record<string, unknown>, 
       editTurnSet: new Set(),
       fileTurns: new Map(),
       costByProcess: new Map(),
+      firstEditDone: false,
+      explore: { calls: 0, chars: 0 },
     };
     s.stats.project = projectDir; // запасна мітка; уточнюється з cwd
     map.set(id, s);
@@ -238,10 +256,21 @@ function onUser(s: SessionState, r: Record<string, unknown>, sessionLabelled: bo
     for (const res of results) {
       const id = typeof res.tool_use_id === 'string' ? res.tool_use_id : '';
       const tool = s.tools.get(id);
+      if (tool) {
+        const size = resultText(res).length;
+        s.stats.toolResultChars[toolLabel(tool.name)] = (s.stats.toolResultChars[toolLabel(tool.name)] ?? 0) + size;
+        if (!s.firstEditDone && r.isSidechain !== true && EXPLORE_TOOLS.has(tool.name)) {
+          s.explore.calls++;
+          s.explore.chars += size;
+        }
+        const k = tool.readPath && res.is_error !== true ? KNOWLEDGE_PATH.exec(tool.readPath) : null;
+        if (k) bump(s.stats.knowledgeReads, `${k[1] === '_shared' ? 'клієнт' : 'проєкт'}: ${(k[2] as string).replace(/\\/g, '/')}`);
+      }
       if (res.is_error === true) {
         bump(s.stats.toolErrors, tool?.name ?? 'unknown');
       } else if (tool && EDIT_TOOLS.has(tool.name) && decision !== 'reject' && r.isSidechain !== true) {
         s.editTurnSet.add(tool.turn);
+        s.firstEditDone = true;
         if (tool.fileKey) {
           let turns = s.fileTurns.get(tool.fileKey);
           if (!turns) s.fileTurns.set(tool.fileKey, (turns = new Set()));
@@ -309,6 +338,7 @@ function onAssistant(s: SessionState, r: Record<string, unknown>, seenMessage: S
     if (name === 'Skill' && typeof input.skill === 'string' && SAFE.test(input.skill)) bump(s.stats.skills, input.skill);
     if (AGENT_TOOLS.has(name)) bump(s.stats.subagents, typeof input.subagent_type === 'string' && SAFE.test(input.subagent_type) ? input.subagent_type : 'general-purpose');
     const pending: PendingTool = { name, turn: s.turn };
+    if (name === 'Read' && typeof input.file_path === 'string') pending.readPath = input.file_path; // лише в пам'яті
     if (EDIT_TOOLS.has(name)) {
       const p = typeof input.file_path === 'string' ? input.file_path : typeof input.notebook_path === 'string' ? input.notebook_path : undefined;
       if (p) pending.fileKey = p; // лише ключ у пам’яті
@@ -350,6 +380,7 @@ function finalize(s: SessionState): void {
   st.filesEdited = s.fileTurns.size;
   st.filesReedited = [...s.fileTurns.values()].filter((turns) => turns.size >= 2).length;
   if (s.costByProcess.size > 0) st.costUSD = round([...s.costByProcess.values()].reduce((a, b) => a + b, 0));
+  st.exploreBeforeEdit = s.firstEditDone ? { ...s.explore } : null;
   s.fileTurns.clear(); // шляхи не виходять за межі збору
 }
 

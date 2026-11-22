@@ -45,6 +45,11 @@ export interface Report {
   rejections: Record<string, number>;
   compactions: Record<string, number>;
   versions: Record<string, number>;
+  /** Обсяг результатів інструментів, символів. */
+  toolResultChars: Record<string, number>;
+  /** Read/Grep/Glob до першої правки — середнє на сесію з правками (ADR 0004, п. 9). */
+  exploreBeforeEdit: { sessions: number; avgCalls: number; avgChars: number };
+  knowledgeReads: Record<string, number>;
   /** Ключ — понеділок тижня (YYYY-MM-DD). */
   byWeek: Record<string, Totals>;
   byProject: Record<string, Totals>;
@@ -85,10 +90,20 @@ export function buildReport(sessions: SessionStats[], opts: { anonymize?: boolea
     rejections: merge((s) => s.rejections),
     compactions: merge((s) => s.compactions),
     versions,
+    toolResultChars: merge((s) => s.toolResultChars),
+    exploreBeforeEdit: explore(sessions),
+    knowledgeReads: merge((s) => s.knowledgeReads),
     byWeek: group((s) => weekStart(s.start)),
     byProject: group((s) => project(s.project)),
     byEntrypoint: group((s) => s.entrypoint),
   };
+}
+
+export function explore(sessions: SessionStats[]): Report['exploreBeforeEdit'] {
+  const withEdit = sessions.map((s) => s.exploreBeforeEdit).filter((x): x is { calls: number; chars: number } => x !== null);
+  const n = withEdit.length;
+  const avg = (f: (x: { calls: number; chars: number }) => number) => (n ? Math.round((withEdit.reduce((a, x) => a + f(x), 0) / n) * 10) / 10 : 0);
+  return { sessions: n, avgCalls: avg((x) => x.calls), avgChars: Math.round(avg((x) => x.chars)) };
 }
 
 export function totals(sessions: SessionStats[]): Totals {
@@ -256,6 +271,20 @@ ${Object.entries(r.byEntrypoint).map(([k, x]) => row(k, x)).join('\n')}
 | Інструмент | Викликів |
 | --- | --- |
 ${top(r.tools)}
+
+## Обсяг результатів інструментів
+
+| Інструмент | Символів |
+| --- | --- |
+${top(r.toolResultChars)}
+
+До першої правки (сесії з правками: ${r.exploreBeforeEdit.sessions}): у середньому ${r.exploreBeforeEdit.avgCalls} викликів Read/Grep/Glob і ${fmt(r.exploreBeforeEdit.avgChars)} символів їхніх результатів.
+
+## Читання бази знань
+
+| Запис | Прочитано |
+| --- | --- |
+${top(r.knowledgeReads)}
 
 ## Помилки інструментів
 
