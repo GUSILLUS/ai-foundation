@@ -11,7 +11,7 @@ claude plugin marketplace add GUSILLUS/ai-foundation
 claude plugin install af-core@ai-foundation
 ```
 
-## Що є (0.3.0)
+## Що є (0.4.0)
 
 **Хук SessionStart** (`hooks/session-start.ts`) на кожному старті, `/clear`, відновленні й стисненні додає агенту:
 
@@ -30,6 +30,13 @@ claude plugin install af-core@ai-foundation
 ```
 
 `client` і `project` — slug (a-z, 0-9, `-`, `_`). Незареєстрована тека отримує лише правила: вгадувати проєкт за назвою теки не можна (ізоляція клієнтів). Збій (зламаний реєстр, неоднозначний remote) — правила без картки й один рядок користувачу; сесія не блокується. Тека даних перевизначається змінною `AF_DATA_DIR`.
+
+**Підказки на записи знань** (`hooks/prompt-hints.ts`, `hooks/tool-hints.ts`) — без моделі й лише за збігом:
+
+- на промпт: слова промпту ↔ назви записів і їхні `aliases` (з урахуванням закінчень) → один рядок «релевантні записи знань: …»;
+- після Read/Edit/Write: файл під `paths` запису проєкту → підказка цього запису.
+
+Не більше трьох записів за раз; уже підказане чи прочитане в сесії не повторюється, а після `/clear` чи стиснення стан скидається. Стан — у `CLAUDE_PLUGIN_DATA`.
 
 **Скіл `project-knowledge`** (`/af-core:project-knowledge [register | card | record <тема> | verify]`) веде картку й базу знань:
 

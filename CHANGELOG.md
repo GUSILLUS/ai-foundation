@@ -6,6 +6,8 @@
 
 ### Додано (плагіни)
 
+- `af-core` 0.4.0: підказки на записи знань без моделі — `UserPromptSubmit` за назвами й `aliases` (з урахуванням закінчень: «деплою» ~ «деплой»), `PostToolUse` для Read/Edit/Write, коли файл під `paths` запису проєкту. Не більше трьох записів; уже підказане чи прочитане в сесії не повторюється; `/clear` і стиснення скидають стан (`CLAUDE_PLUGIN_DATA`).
+- `af-controls` 0.1.3: оновлена копія спільної обв'язки хуків (контекст і для `PostToolUse`); поведінка `env-guard` не змінилась.
 - `af-core` 0.3.0: скіл `project-knowledge` — реєстрація проєкту (за git remote, наявне в `projects.json` не перезаписує), картка за шаблоном, записи знань з джерелами, перевірка застарілих записів і перенесення з auto memory через кандидати `_inbox/`; усе — з затвердженням користувача. Скрипт `scripts/knowledge.ts` (`where`, `register`, `index`, `stale`) генерує `_topic.md`, `_index.md` і розділ «Знання» картки. Eval-кейси: запис знань і питання, на яке скіл не має спрацьовувати.
 - `af-core` 0.2.0: хук SessionStart — глобальні правила (`context/global-rules.md`) і картка проєкту з `~/ai-foundation-data/projects/<клієнт>/<проєкт>/context.md`; проєкт визначається за реєстром `projects.json` (git remote, worktree, запасний варіант — шлях); деградація без блокування. Шаблон картки — `templates/context.md`.
 - Спільна обв'язка хуків: результат `context` (additionalContext для SessionStart і UserPromptSubmit + рядок користувачу); копія тепер і в `af-core`.

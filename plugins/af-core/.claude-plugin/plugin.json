@@ -1,6 +1,6 @@
 {
   "name": "af-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Контекст проєкту, init, шаблони й робочий ланцюг для AI Foundation",
   "author": {
     "name": "Ivan Ivakhnenko",

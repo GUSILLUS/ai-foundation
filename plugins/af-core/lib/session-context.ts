@@ -38,6 +38,17 @@ export function findGitDir(start: string): string | undefined {
   }
 }
 
+/** Корінь робочої копії (тека з `.git` — каталогом чи файлом worktree) від `start` угору. */
+export function findRepoRoot(start: string): string | undefined {
+  let dir = path.resolve(start);
+  for (;;) {
+    if (existsSync(path.join(dir, '.git'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) return undefined;
+    dir = parent;
+  }
+}
+
 /** Конфіг репозиторію: для worktree — спільний (`commondir`). */
 export function gitConfigPath(gitDir: string): string {
   const common = path.join(gitDir, 'commondir');

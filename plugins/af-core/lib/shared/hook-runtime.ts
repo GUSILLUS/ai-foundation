@@ -28,13 +28,13 @@ export type HookOutcome =
   /** Перевірку виконати неможливо: дія триває, користувач бачить попередження. */
   | { kind: 'degrade'; reason: string }
   /**
-   * Додати текст у контекст агента (SessionStart, UserPromptSubmit); `notice` — один рядок користувачу.
+   * Додати текст у контекст агента (SessionStart, UserPromptSubmit, PostToolUse); `notice` — один рядок користувачу.
    * Порожній текст без notice — те саме, що pass.
    */
   | { kind: 'context'; text: string; notice?: string };
 
 /** Події, для яких Claude Code приймає additionalContext від command-хука. */
-export const CONTEXT_EVENTS = new Set(['SessionStart', 'UserPromptSubmit']);
+export const CONTEXT_EVENTS = new Set(['SessionStart', 'UserPromptSubmit', 'PostToolUse']);
 
 export interface HookResponse {
   code: number;
