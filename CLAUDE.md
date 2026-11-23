@@ -44,7 +44,7 @@ AI Foundation — набір плагінів Claude Code для моєї ком
 - `npm test` — усі тести (хуки й скрипти) без решти перевірок. `npm run validate -- --only <id>` / `--skip <id>` — вибіркові перевірки.
 - `npm run sync` — оновити копії спільного коду з `shared/`.
 - `npm run names:update` — оновити `.private-names.json` після зміни списку назв `~/ai-foundation-data/private-names.txt`; `npm run hooks:install` — підключити хук `pre-push` (раз на машину).
-- `npm run metrics:baseline` / `npm run metrics:inventory` — базова лінія метрик / опис транскриптів; звіти в `~/ai-foundation-data/metrics/`.
+- `npm run metrics:baseline` / `npm run metrics:inventory` — базова лінія метрик / опис транскриптів; `npm run metrics:audit` — аудит плагінів, скілів і MCP (`--all` для всіх транскриптів); звіти в `~/ai-foundation-data/metrics/`.
 - `claude --plugin-dir ./plugins` — сесія з локальними плагінами; після змін хуків чи агентів — `/reload-plugins`.
 - Реліз: підняти `version` лише в `plugin.json`, запис у `CHANGELOG.md`, `claude plugin tag plugins/<плагін>`.
 
@@ -52,7 +52,7 @@ AI Foundation — набір плагінів Claude Code для моєї ком
 
 Етап 1 — каркас — завершено 2026-11-20 (реліз 0.1.0). Базова лінія метрик — `docs/decisions/0002-metrics-baseline.md`.
 
-Етап 2 — контекст один раз, потім handoff; чекліст — `docs/tech-start.md`, рішення — ADR 0004 (прийнято). Код етапу готовий (`af-core` 0.4.1, `af-handoff` 0.2.0, `af-metrics` 0.2.0, `af-controls` 0.1.3); лишились експеримент із графом коду, перевірка на реальних проєктах і реліз. Назви клієнтів і їхніх проєктів у репо не пишемо — лише в `~/ai-foundation-data/`. Робочий ланцюг, рев'ю коду, worktree, ролі, self-learning і нові метрики — **не** на цьому етапі: зупинитися й спитати.
+Етап 2 — контекст один раз, потім handoff; чекліст — `docs/tech-start.md`, рішення — ADR 0004 (прийнято). Код етапу готовий (`af-core` 0.4.1, `af-handoff` 0.2.0, `af-metrics` 0.3.0 з аудитом плагінів, `af-controls` 0.1.3); лишились експеримент із графом коду, перевірка на реальних проєктах і реліз. Назви клієнтів і їхніх проєктів у репо не пишемо — лише в `~/ai-foundation-data/`. Робочий ланцюг, рев'ю коду, worktree, ролі, self-learning і нові метрики — **не** на цьому етапі: зупинитися й спитати.
 
 ## Де деталі
 

@@ -1,6 +1,6 @@
 {
   "name": "af-metrics",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Метрики використання агентів для AI Foundation",
   "author": {
     "name": "Ivan Ivakhnenko",
