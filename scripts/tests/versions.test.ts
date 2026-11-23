@@ -34,15 +34,17 @@ test('змінено плагін без підняття версії — по�
 });
 
 test('змінено плагін і піднято версію — чисто (також після коміту)', () => {
-  repo.write('plugins/af-core/README.md', '# af-core\nновий рядок\n');
+  repo.write('plugins/af-core/hooks/y.ts', 'export {};\n');
   repo.write('plugins/af-core/.claude-plugin/plugin.json', manifest('0.1.1'));
   assert.deepEqual(check().errors, []);
   git('commit', '-qam', 'bump');
   assert.deepEqual(check().errors, []);
 });
 
-test('зміни лише в tests/ версії не потребують', () => {
+test('зміни лише в tests/, evals/ і README.md версії не потребують', () => {
   repo.write('plugins/af-core/tests/x.test.ts', 'export {};\n');
+  repo.write('plugins/af-core/evals/case/prompt.md', 'x\n');
+  repo.write('plugins/af-core/README.md', '# af-core\nоновлено\n');
   assert.deepEqual(check().errors, []);
 });
 

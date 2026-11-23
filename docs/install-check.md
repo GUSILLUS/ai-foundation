@@ -14,7 +14,7 @@ claude plugin list
 claude plugin details af-controls@ai-foundation
 
 # Хук із встановленої копії (кеш), вхід — синтетична фікстура з репозиторію
-$hook = "$env:CLAUDE_CONFIG_DIR\plugins\cache\ai-foundation\af-controls\0.1.0\hooks\env-guard.ts"
+$hook = (Get-ChildItem "$env:CLAUDE_CONFIG_DIR\plugins\cache\ai-foundation\af-controls\*\hooks\env-guard.ts" | Select-Object -Last 1).FullName
 Get-Content "D:\Pet Projects\ai-foundations\plugins\af-controls\tests\fixtures\read-env.json" | node $hook
 Get-Content "D:\Pet Projects\ai-foundations\plugins\af-controls\tests\fixtures\read-normal.json" | node $hook
 
@@ -32,7 +32,7 @@ for p in af-core af-controls af-handoff af-metrics; do claude plugin install "$p
 claude plugin list
 claude plugin details af-controls@ai-foundation
 
-hook="$CLAUDE_CONFIG_DIR/plugins/cache/ai-foundation/af-controls/0.1.0/hooks/env-guard.ts"
+hook="$(ls -d "$CLAUDE_CONFIG_DIR"/plugins/cache/ai-foundation/af-controls/*/hooks/env-guard.ts | tail -1)"
 node "$hook" < plugins/af-controls/tests/fixtures/read-env.json
 node "$hook" < plugins/af-controls/tests/fixtures/read-normal.json
 
@@ -45,8 +45,8 @@ rm -rf "$(dirname "$CLAUDE_CONFIG_DIR")"; unset CLAUDE_CONFIG_DIR
 
 - `marketplace add` — `Successfully added marketplace: ai-foundation`.
 - Кожен `install` — `Successfully installed plugin: <плагін>@ai-foundation (scope: user)`.
-- `plugin list` — чотири плагіни, `Version: 0.1.0`, `Status: ✔ enabled`.
-- `plugin details af-controls@ai-foundation` — `Hooks (1) PreToolUse`.
+- `plugin list` — чотири плагіни з версіями з їхніх `plugin.json`, `Status: ✔ enabled`.
+- `plugin details af-controls@ai-foundation` — `Hooks (1) PreToolUse`; `af-core` — `SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`; `af-handoff` — `PreCompact`, `SessionEnd`, `SessionStart`.
 - Хук на `read-env.json` — JSON з `"permissionDecision":"deny"`; на `read-normal.json` — порожній вивід. Обидва з кодом 0.
 
 ## Журнал перевірок

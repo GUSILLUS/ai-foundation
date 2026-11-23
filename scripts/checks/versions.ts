@@ -6,10 +6,13 @@ import { compareSemver, isSemver } from '../lib/semver.ts';
 import { emptyResult, type Check } from '../lib/types.ts';
 
 const MANIFEST = '.claude-plugin/plugin.json';
+/** Не впливає на поведінку встановленого плагіна. */
+const DEV_ONLY = ['tests/', 'evals/', 'README.md'];
 
 /**
  * Змінений плагін — нова версія (E3.3 roadmap друга): без неї Claude Code не оновить кеш,
- * і на машині лишиться старий код. Зміни лише в `tests/` версії не потребують.
+ * і на машині лишиться старий код. Зміни лише в `tests/`, `evals/` і `README.md` версії не потребують:
+ * на поведінку встановленого плагіна вони не впливають.
  * База — `--base <ref>` (CI) або upstream поточної гілки (локально).
  */
 export const versionsCheck: Check = {
@@ -45,7 +48,7 @@ export const versionsCheck: Check = {
     let checked = 0;
     for (const plugin of listPluginDirs(root)) {
       const prefix = `plugins/${plugin}/`;
-      const files = [...changed].filter((f) => f.startsWith(prefix) && !f.startsWith(`${prefix}tests/`));
+      const files = [...changed].filter((f) => f.startsWith(prefix) && !DEV_ONLY.some((d) => f.startsWith(prefix + d)));
       if (files.length === 0) continue;
       checked++;
       const before = git('show', `${from}:${prefix}${MANIFEST}`);

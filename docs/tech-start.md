@@ -1,6 +1,6 @@
 # AI Foundation — технічний старт
 
-Nov 8, 2026 · @Ivan Ivakhnenko · оновлено 21.11.2026: етап 1 завершено, план етапу 2
+Nov 8, 2026 · @Ivan Ivakhnenko · оновлено 23.11.2026: етап 1 завершено, етап 2 — код готовий, триває перевірка на реальних проєктах
 
 ## Призначення
 
@@ -37,7 +37,15 @@ ai-foundation/
 │   └── marketplace.json        # каталог плагінів (маркетплейс ai-foundation)
 ├── .github/workflows/ci.yml    # validate на Ubuntu і Windows, Node 22.18 і 24
 ├── plugins/
-│   ├── af-core/                # контекст, init, шаблони, робочий ланцюг (поки порожній)
+│   ├── af-core/                # контекст проєкту й база знань (ADR 0004)
+│   │   ├── hooks/              # session-start, prompt-hints, tool-hints, inbox-reminder
+│   │   ├── lib/                # session-context, knowledge, hints, inbox; lib/shared/ — копії
+│   │   ├── context/global-rules.md  # глобальні правила (SessionStart)
+│   │   ├── templates/context.md     # шаблон картки проєкту
+│   │   ├── skills/project-knowledge/ # реєстрація, картка, записи знань, перевірка
+│   │   ├── scripts/knowledge.ts     # where, register, index, stale
+│   │   ├── evals/              # сценарії claude plugin eval
+│   │   └── tests/
 │   ├── af-controls/            # бар’єри безпеки
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── hooks/hooks.json    # реєстрація хуків (exec-форма)
@@ -45,12 +53,20 @@ ai-foundation/
 │   │   ├── lib/env-guard.ts    # логіка, яку тестуємо
 │   │   ├── lib/shared/         # копії з shared/ (npm run sync), не редагувати
 │   │   └── tests/              # тести й синтетичні фікстури
-│   ├── af-handoff/             # передача стану між сесіями (поки порожній)
+│   ├── af-handoff/             # знімки сесії й ручний handoff
+│   │   ├── hooks/              # pre-compact, session-end (clear), session-start
+│   │   ├── lib/snapshot.ts     # знімок з транскрипту без моделі
+│   │   ├── skills/handoff/     # ручний handoff за шаблоном
+│   │   ├── templates/handoff.md
+│   │   ├── scripts/handoff.ts  # where, snapshot
+│   │   └── tests/
 │   └── af-metrics/             # аналізатор історії сесій
 │       ├── scripts/analyze-history.ts
 │       ├── lib/                # transcripts, inventory, metrics, report
 │       └── tests/
-├── shared/                     # канонічні джерела спільного коду + sync.json (мапа копій)
+├── shared/                     # hook-runtime.ts, project-registry.ts + sync.json (мапа копій)
+├── .githooks/pre-push          # перевірка назв у нових комітах (npm run hooks:install)
+├── .private-names.json         # HMAC-відбитки назв клієнтів і проєктів (самі назви — лише локально)
 ├── scripts/
 │   ├── validate.ts             # npm run validate
 │   ├── checks/                 # окремі перевірки validate
@@ -71,11 +87,19 @@ ai-foundation/
 └── tsconfig.json               # erasableSyntaxOnly, verbatimModuleSyntax
 
 ~/ai-foundation-data/           # поза будь-яким git, на кожній машині
-├── projects/<клієнт>/<проєкт>/ # context.md, knowledge/, specs, plans, handoff (з етапу 2)
+├── projects.json               # реєстр: git remote чи шлях → клієнт і проєкт
+├── private-names.txt           # назви клієнтів і проєктів для перевірки names
+├── projects/<клієнт>/
+│   ├── _shared/knowledge/      # знання, спільні для проєктів клієнта
+│   └── <проєкт>/
+│       ├── context.md          # картка проєкту (SessionStart)
+│       ├── knowledge/          # дерево знань: _index.md, _topic.md, записи, _inbox/, _changes.md
+│       └── handoff/            # автоматичні знімки й ручні handoff
+├── unregistered/<тека>/handoff/ # знімки незареєстрованих тек
 └── metrics/                    # inventory-<дата>.json, baseline-<дата>.md/.json
 ```
 
-Структуру звірено з документацією Claude Code (ADR 0001) і реалізовано в етапі 1.
+Структуру звірено з документацією Claude Code (ADR 0001); каркас — етап 1, контекст і handoff — етап 2.
 
 ## Середовище розробки
 
@@ -99,7 +123,7 @@ ai-foundation/
 | Типи (`typecheck`) | `tsc --noEmit`, зокрема заборона нестираного синтаксису |
 | Спільний код (`sync`) | Копії збігаються з `shared/`; немає відсутніх і зайвих копій |
 | Секрети (`secrets`) | Токени, ключі, `.env`; у звіті лише файл, рядок і тип |
-| Версії (`versions`) | Змінений плагін (крім `tests/`) має версію вищу, ніж у базі: `--base` у CI, upstream гілки локально |
+| Версії (`versions`) | Змінений плагін (крім `tests/`, `evals/`, `README.md`) має версію вищу, ніж у базі: `--base` у CI, upstream гілки локально |
 | Бюджет (`budget`) | Глобальні правила ≤ 2 000 і шаблон картки ≤ 6 000 символів, разом ≤ 10 000 (ліміт SessionStart); перевищення — попередження |
 | Назви (`names`) | Назви клієнтів і проєктів у файлах, шляхах і (з `--commits`) повідомленнях комітів. Локально — за списком `~/ai-foundation-data/private-names.txt`, у CI — за HMAC-відбитками `.private-names.json` і секретом `AF_NAMES_KEY`; без списку й ключа — пропуск, у CI без ключа — помилка. У звіті лише файл і рядок. Хук `pre-push` (`npm run hooks:install`) перевіряє нові коміти перед push |
 | Фікстури (`fixtures`) | Лише синтетичні дані: білий список значень, без e-mail, реальних шляхів і вільного тексту |
@@ -136,7 +160,7 @@ CI — GitHub Actions з матрицею `ubuntu-latest` + `windows-latest` і 
 
 ## Етап 2: контекст один раз — критерій готовності
 
-**Статус:** план затверджено 2026-11-21; ADR 0004 прийнято 2026-11-21.
+**Статус:** план затверджено 2026-11-21; ADR 0004 прийнято 2026-11-21. Код етапу готовий 2026-11-23 (`af-core` 0.4.1, `af-controls` 0.1.3, `af-handoff` 0.2.0, `af-metrics` 0.2.0); лишились експеримент із графом, перевірка на реальних проєктах і реліз.
 
 Етап 2 завершено, коли нова сесія у двох поточних комерційних проєктах одного клієнта знає проєкт без мого вступу, а після стиснення контексту чи `/clear` продовжує з того ж місця. Порядок: контекст → handoff. Робочий ланцюг, рев'ю коду (ADR 0003) і worktree — етап 3.
 
