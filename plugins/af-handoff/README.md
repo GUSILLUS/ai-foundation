@@ -25,6 +25,6 @@ claude plugin install af-handoff@ai-foundation
 
 Знімки лежать у `~/ai-foundation-data/projects/<клієнт>/<проєкт>/handoff/` (проєкт — за реєстром `projects.json`, як в `af-core`); незареєстровані теки — окремо, в `~/ai-foundation-data/unregistered/`. Зберігаються останні 20 автоматичних знімків; ручні не видаляються.
 
-**Скіл `handoff`** (`/af-handoff:handoff`) — ручний handoff за шаблоном `templates/handoff.md`: стан, рішення з причинами, відкриті питання, один наступний крок, що вже вивчено, кандидати знань. Факти сесії бере скрипт `scripts/handoff.ts snapshot`.
+**Скіл `handoff`** (`/af-handoff:handoff`) — ручний handoff за шаблоном `templates/handoff.md`: стан, рішення з причинами, відкриті питання, один наступний крок, що вже вивчено, кандидати знань. Факти сесії бере скрипт `scripts/handoff.ts snapshot`. Перед записом показує наступний крок і відкриті питання й питає «Зберегти / Змінити / Не зберігати» — це рішення користувача.
 
 Плагін ні від кого не залежить: визначення проєкту — спільна копія `lib/shared/project-registry.ts`. Кожна зміна — з тестом і записом у кореневому `CHANGELOG.md`.
