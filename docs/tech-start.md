@@ -162,8 +162,8 @@ CI — GitHub Actions з матрицею `ubuntu-latest` + `windows-latest` і 
 
 Handoff:
 
-- [ ] Шаблон handoff: стан, рішення, відкриті питання, наступний крок, що вже вивчено (файли й записи знань) і незатверджені кандидати знань
-- [ ] `af-handoff`: скіл `handoff`, хуки PreCompact і SessionEnd (`clear`) зберігають знімок у `~/ai-foundation-data/projects/<клієнт>/<проєкт>/handoff/`, SessionStart (`compact`, `clear`) повертає його; тести на фікстурах
+- [x] Шаблон handoff: стан, рішення, відкриті питання, наступний крок, що вже вивчено (файли й записи знань) і незатверджені кандидати знань — `af-handoff/templates/handoff.md`
+- [x] `af-handoff`: скіл `handoff`, хуки PreCompact і SessionEnd (`clear`) зберігають знімок у `~/ai-foundation-data/projects/<клієнт>/<проєкт>/handoff/`; SessionStart після стиснення повертає знімок, після `/clear` і на новому старті — лише вказівку на нього (`/clear` лишається `/clear`); тести на синтетичних даних (`af-handoff` 0.2.0). Перевірити в живій сесії час SessionEnd на великому транскрипті
 
 Перевірка і реліз:
 

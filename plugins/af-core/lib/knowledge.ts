@@ -15,10 +15,12 @@ import {
   readRegistry,
   readRemotes,
   resolveProject,
+  SLUG,
   type ProjectEntry,
 } from './session-context.ts';
 
-export const SLUG = /^[a-z0-9][a-z0-9_-]{0,63}$/;
+export { SLUG };
+
 export const RECORD_TYPES = ['process', 'flow', 'feature', 'edge-case', 'decision', 'glossary'] as const;
 export const RECORD_MAX_LINES = 150;
 export const GEN_START = '<!-- af:generated:start -->';

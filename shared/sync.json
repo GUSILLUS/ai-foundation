@@ -1,6 +1,20 @@
 {
   "$comment": "Які файли з shared/ копіюються в які плагіни. Копія лягає в plugins/<плагін>/lib/shared/<файл>. Після змін — npm run sync.",
   "files": [
-    { "source": "hook-runtime.ts", "plugins": ["af-controls", "af-core"] }
+    {
+      "source": "hook-runtime.ts",
+      "plugins": [
+        "af-controls",
+        "af-core",
+        "af-handoff"
+      ]
+    },
+    {
+      "source": "project-registry.ts",
+      "plugins": [
+        "af-core",
+        "af-handoff"
+      ]
+    }
   ]
 }
